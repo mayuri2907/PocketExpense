@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">PocketExpense</string>
+    <string name="notification_listener_service_label">PocketExpense UPI Payment Detector</string>
+</resources>

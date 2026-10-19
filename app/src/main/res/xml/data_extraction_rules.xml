@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<data-extraction-rules>
+    <cloud-backup>
+        <!-- Keep local SQLite financial database strictly on-device, preventing cloud upload -->
+        <exclude domain="database" path="." />
+    </cloud-backup>
+    <device-transfer>
+        <!-- Allow secure direct device-to-device transfer when user migrates phones -->
+        <include domain="database" path="." />
+    </device-transfer>
+</data-extraction-rules>
