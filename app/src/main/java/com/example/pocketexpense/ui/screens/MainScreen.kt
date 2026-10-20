@@ -81,8 +81,11 @@ enum class NavTab(val label: String, val icon: ImageVector) {
 fun MainScreen(
     viewModel: ExpenseViewModel,
     isQuickExpenseTriggered: Boolean = false,
-    onQuickExpenseHandled: () -> Unit = {}
+    onQuickExpenseHandled: () -> Unit = {},
+    currentThemeMode: com.example.pocketexpense.util.ThemeMode = com.example.pocketexpense.util.ThemeMode.SYSTEM,
+    onThemeChanged: (com.example.pocketexpense.util.ThemeMode) -> Unit = {}
 ) {
+    val colors = com.example.pocketexpense.ui.theme.AppTheme.colors
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val app = context.applicationContext as PocketExpenseApplication
@@ -139,7 +142,7 @@ fun MainScreen(
             isNotificationListenerEnabled = isNotificationListenerEnabled,
             isOverlayPermissionEnabled = isOverlayPermissionEnabled,
             isServiceConnected = isServiceConnected,
-            onEnableNotificationAccess = {
+            onEnableNotificationListener = {
                 ExpenseNotificationListenerService.tryRebind(context)
                 context.startActivity(NotificationPermissionHelper.createSettingsIntent())
             },
@@ -173,15 +176,15 @@ fun MainScreen(
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
-            .background(DarkBackground),
-        containerColor = DarkBackground,
+            .background(colors.background),
+        containerColor = colors.background,
         snackbarHost = { SnackbarHost(snackbarHostState) },
         bottomBar = {
             NavigationBar(
-                containerColor = DarkSurface,
+                containerColor = colors.surface,
                 modifier = Modifier
                     .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
-                    .border(1.dp, DarkBorder, RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)),
+                    .border(1.dp, colors.border, RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)),
                 tonalElevation = 10.dp
             ) {
                 NavTab.entries.forEach { tab ->
@@ -204,11 +207,11 @@ fun MainScreen(
                             )
                         },
                         colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = MintGreen,
-                            selectedTextColor = MintGreen,
-                            unselectedIconColor = TextSecondary,
-                            unselectedTextColor = TextSecondary,
-                            indicatorColor = MintGreen.copy(alpha = 0.18f)
+                            selectedIconColor = colors.primary,
+                            selectedTextColor = colors.primary,
+                            unselectedIconColor = colors.textSecondary,
+                            unselectedTextColor = colors.textSecondary,
+                            indicatorColor = colors.primary.copy(alpha = 0.18f)
                         )
                     )
                 }
@@ -310,10 +313,9 @@ fun MainScreen(
                             }
                         },
                         onResetDatabase = { viewModel.resetDatabase() },
-                        isServiceConnected = isServiceConnected,
-                        onReopenOnboarding = {
-                            isOnboardingCompleted = false
-                        }
+                        currentThemeMode = currentThemeMode,
+                        onThemeChanged = onThemeChanged,
+                        isServiceConnected = isServiceConnected
                     )
                 }
             }

@@ -25,7 +25,6 @@ import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.filled.ReceiptLong
 import androidx.compose.material.icons.automirrored.filled.TrendingDown
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.FlashOn
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material3.Button
@@ -40,7 +39,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -50,19 +48,7 @@ import com.example.pocketexpense.ui.components.CategoryIconHelper
 import com.example.pocketexpense.ui.components.ExpenseItemCard
 import com.example.pocketexpense.ui.components.NotificationAccessCard
 import com.example.pocketexpense.ui.components.OverlayAccessCard
-import com.example.pocketexpense.ui.theme.DarkBorder
-import com.example.pocketexpense.ui.theme.DarkBorderSubtle
-import com.example.pocketexpense.ui.theme.DarkSurface
-import com.example.pocketexpense.ui.theme.DarkSurfaceElevated
-import com.example.pocketexpense.ui.theme.DarkSurfaceHighlight
-import com.example.pocketexpense.ui.theme.ElectricPurple
-import com.example.pocketexpense.ui.theme.MintGreen
-import com.example.pocketexpense.ui.theme.MintGreenContainer
-import com.example.pocketexpense.ui.theme.MintGreenGlow
-import com.example.pocketexpense.ui.theme.SkyBlue
-import com.example.pocketexpense.ui.theme.TextPrimary
-import com.example.pocketexpense.ui.theme.TextSecondary
-import com.example.pocketexpense.ui.theme.TextTertiary
+import com.example.pocketexpense.ui.theme.AppTheme
 import com.example.pocketexpense.ui.viewmodel.DashboardUiState
 import com.example.pocketexpense.util.CurrencyUtils
 
@@ -82,6 +68,8 @@ fun DashboardScreen(
     onRebindService: (() -> Unit)? = null,
     onQuickExpenseClick: () -> Unit = {}
 ) {
+    val colors = AppTheme.colors
+
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
@@ -97,54 +85,41 @@ fun DashboardScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            text = "PocketExpense",
-                            fontSize = 24.sp,
-                            fontWeight = FontWeight.Black,
-                            color = TextPrimary,
-                            letterSpacing = (-0.5).sp
-                        )
-                    }
+                    Text(
+                        text = "PocketExpense",
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Black,
+                        color = colors.textPrimary,
+                        letterSpacing = (-0.5).sp
+                    )
                     Spacer(modifier = Modifier.height(2.dp))
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(6.dp)
-                                .clip(CircleShape)
-                                .background(MintGreen)
-                        )
-                        Text(
-                            text = "Local-First • 100% Private",
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = MintGreen
-                        )
-                    }
+                    Text(
+                        text = "Smart Expense Tracker",
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = colors.primary
+                    )
                 }
 
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    // Quick Expense Trigger Button
+                    // Quick Expense Trigger Button (5s popup)
                     OutlinedButton(
                         onClick = onQuickExpenseClick,
                         shape = RoundedCornerShape(16.dp),
                         colors = ButtonDefaults.outlinedButtonColors(
-                            containerColor = MintGreenContainer.copy(alpha = 0.4f),
-                            contentColor = MintGreen
+                            containerColor = colors.primaryContainer.copy(alpha = 0.5f),
+                            contentColor = colors.primary
                         ),
-                        border = androidx.compose.foundation.BorderStroke(1.dp, MintGreen.copy(alpha = 0.5f))
+                        border = androidx.compose.foundation.BorderStroke(1.dp, colors.primary.copy(alpha = 0.5f))
                     ) {
                         Icon(
                             imageVector = Icons.Default.FlashOn,
                             contentDescription = "Quick Expense",
                             modifier = Modifier.size(18.dp),
-                            tint = MintGreen
+                            tint = colors.primary
                         )
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text(text = "Quick", fontWeight = FontWeight.Bold, color = MintGreen)
+                        Text(text = "Quick", fontWeight = FontWeight.Bold, color = colors.primary)
                     }
 
                     // Add Expense Button
@@ -152,8 +127,8 @@ fun DashboardScreen(
                         onClick = onAddExpenseClick,
                         shape = RoundedCornerShape(16.dp),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = MintGreen,
-                            contentColor = Color.Black
+                            containerColor = colors.primary,
+                            contentColor = if (colors.isDark) Color.Black else Color.White
                         )
                     ) {
                         Icon(
@@ -168,32 +143,23 @@ fun DashboardScreen(
             }
         }
 
-        // 2. Luxury Hero Card: Total Expenses
+        // 2. Luxury Hero Card: Total Spending
         item {
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(26.dp))
-                    .border(1.dp, DarkBorderSubtle, RoundedCornerShape(26.dp)),
-                color = DarkSurface
+                    .border(1.dp, colors.borderSubtle, RoundedCornerShape(26.dp)),
+                color = colors.surface
             ) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(
-                            Brush.linearGradient(
-                                colors = listOf(
-                                    ElectricPurple.copy(alpha = 0.22f),
-                                    SkyBlue.copy(alpha = 0.08f),
-                                    MintGreen.copy(alpha = 0.12f),
-                                    DarkSurface
-                                )
-                            )
-                        )
+                        .background(colors.heroCardBrush)
                         .padding(22.dp)
                 ) {
                     Column {
-                        // Top row with status pill
+                        // Top row
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
@@ -204,13 +170,13 @@ fun DashboardScreen(
                                     modifier = Modifier
                                         .size(34.dp)
                                         .clip(CircleShape)
-                                        .background(MintGreen.copy(alpha = 0.18f)),
+                                        .background(Color(0xFF00E6A1).copy(alpha = 0.2f)),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Icon(
                                         imageVector = Icons.AutoMirrored.Filled.TrendingDown,
                                         contentDescription = null,
-                                        tint = MintGreen,
+                                        tint = Color(0xFF00E6A1),
                                         modifier = Modifier.size(18.dp)
                                     )
                                 }
@@ -219,16 +185,16 @@ fun DashboardScreen(
                                     text = "TOTAL SPENDING",
                                     fontSize = 12.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = TextSecondary,
+                                    color = Color(0xFF94A3B8),
                                     letterSpacing = 1.2.sp
                                 )
                             }
 
-                            // Offline Security Pill
+                            // Offline On-Device Pill
                             Surface(
                                 shape = RoundedCornerShape(12.dp),
-                                color = DarkSurfaceElevated.copy(alpha = 0.8f),
-                                border = androidx.compose.foundation.BorderStroke(1.dp, DarkBorder)
+                                color = Color.White.copy(alpha = 0.1f),
+                                border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.15f))
                             ) {
                                 Row(
                                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
@@ -237,7 +203,7 @@ fun DashboardScreen(
                                     Icon(
                                         imageVector = Icons.Default.Shield,
                                         contentDescription = null,
-                                        tint = MintGreen,
+                                        tint = Color(0xFF00E6A1),
                                         modifier = Modifier.size(12.dp)
                                     )
                                     Spacer(modifier = Modifier.width(4.dp))
@@ -245,7 +211,7 @@ fun DashboardScreen(
                                         text = "On-Device",
                                         fontSize = 11.sp,
                                         fontWeight = FontWeight.SemiBold,
-                                        color = TextSecondary
+                                        color = Color(0xFFE2E8F0)
                                     )
                                 }
                             }
@@ -258,34 +224,34 @@ fun DashboardScreen(
                             text = CurrencyUtils.paiseToRupeesString(uiState.totalExpensePaise),
                             fontSize = 38.sp,
                             fontWeight = FontWeight.Black,
-                            color = TextPrimary,
+                            color = Color.White,
                             letterSpacing = (-0.5).sp
                         )
 
                         Spacer(modifier = Modifier.height(10.dp))
 
-                        // Quick summary footer
+                        // Clean summary footer
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "Stored in local encrypted SQLite database",
+                                text = "All time",
                                 fontSize = 12.sp,
-                                color = TextTertiary
+                                color = Color(0xFF94A3B8)
                             )
 
                             if (uiState.recentExpenses.isNotEmpty()) {
                                 Surface(
                                     shape = RoundedCornerShape(8.dp),
-                                    color = MintGreenContainer.copy(alpha = 0.5f)
+                                    color = Color(0xFF00E6A1).copy(alpha = 0.2f)
                                 ) {
                                     Text(
                                         text = "${uiState.recentExpenses.size} recent",
                                         fontSize = 11.sp,
                                         fontWeight = FontWeight.Bold,
-                                        color = MintGreen,
+                                        color = Color(0xFF00E6A1),
                                         modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                                     )
                                 }
@@ -296,22 +262,26 @@ fun DashboardScreen(
             }
         }
 
-        // 3. Notification Access Status Card
-        item {
-            NotificationAccessCard(
-                isPermissionGranted = isNotificationListenerEnabled,
-                onEnableClick = onEnableNotificationListener,
-                isServiceConnected = isServiceConnected,
-                onRebindClick = onRebindService
-            )
+        // 3. Notification Access Status Card (Only shown if permission needed)
+        if (!isNotificationListenerEnabled) {
+            item {
+                NotificationAccessCard(
+                    isPermissionGranted = false,
+                    onEnableClick = onEnableNotificationListener,
+                    isServiceConnected = isServiceConnected,
+                    onRebindClick = onRebindService
+                )
+            }
         }
 
-        // 4. Overlay Permission Status Card
-        item {
-            OverlayAccessCard(
-                isOverlayPermissionGranted = isOverlayPermissionEnabled,
-                onEnableOverlayClick = onEnableOverlayPermission
-            )
+        // 4. Overlay Permission Status Card (Only shown if permission needed)
+        if (!isOverlayPermissionEnabled) {
+            item {
+                OverlayAccessCard(
+                    isOverlayPermissionGranted = false,
+                    onEnableOverlayClick = onEnableOverlayPermission
+                )
+            }
         }
 
         // 5. Category Breakdown Card
@@ -320,8 +290,8 @@ fun DashboardScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(22.dp))
-                    .border(1.dp, DarkBorder, RoundedCornerShape(22.dp)),
-                color = DarkSurface
+                    .border(1.dp, colors.border, RoundedCornerShape(22.dp)),
+                color = colors.surface
             ) {
                 Column(modifier = Modifier.padding(20.dp)) {
                     Row(
@@ -333,13 +303,13 @@ fun DashboardScreen(
                             text = "Category Breakdown",
                             fontSize = 17.sp,
                             fontWeight = FontWeight.Bold,
-                            color = TextPrimary
+                            color = colors.textPrimary
                         )
                         Text(
                             text = "Distribution",
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Medium,
-                            color = TextSecondary
+                            color = colors.textSecondary
                         )
                     }
 
@@ -351,14 +321,14 @@ fun DashboardScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(14.dp))
-                                .background(DarkSurfaceElevated.copy(alpha = 0.5f))
+                                .background(colors.surfaceElevated)
                                 .padding(16.dp),
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
                                 text = "No spending recorded yet. Tap + Add or Quick to start tracking.",
                                 fontSize = 13.sp,
-                                color = TextSecondary
+                                color = colors.textSecondary
                             )
                         }
                     } else {
@@ -392,7 +362,7 @@ fun DashboardScreen(
                                             text = spending.categoryName,
                                             fontSize = 14.sp,
                                             fontWeight = FontWeight.SemiBold,
-                                            color = TextPrimary
+                                            color = colors.textPrimary
                                         )
                                     }
 
@@ -401,18 +371,18 @@ fun DashboardScreen(
                                             text = CurrencyUtils.paiseToRupeesString(spending.totalPaise),
                                             fontSize = 14.sp,
                                             fontWeight = FontWeight.Bold,
-                                            color = TextPrimary
+                                            color = colors.textPrimary
                                         )
                                         Spacer(modifier = Modifier.width(6.dp))
                                         Surface(
                                             shape = RoundedCornerShape(6.dp),
-                                            color = DarkSurfaceHighlight
+                                            color = colors.surfaceHighlight
                                         ) {
                                             Text(
                                                 text = "$percentage%",
                                                 fontSize = 11.sp,
                                                 fontWeight = FontWeight.SemiBold,
-                                                color = TextSecondary,
+                                                color = colors.textSecondary,
                                                 modifier = Modifier.padding(horizontal = 5.dp, vertical = 1.dp)
                                             )
                                         }
@@ -428,7 +398,7 @@ fun DashboardScreen(
                                         .height(7.dp)
                                         .clip(RoundedCornerShape(4.dp)),
                                     color = catColor,
-                                    trackColor = DarkSurfaceElevated
+                                    trackColor = colors.surfaceElevated
                                 )
                             }
                         }
@@ -448,7 +418,7 @@ fun DashboardScreen(
                     text = "Recent Transactions",
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
-                    color = TextPrimary
+                    color = colors.textPrimary
                 )
 
                 Row(
@@ -462,28 +432,28 @@ fun DashboardScreen(
                         text = "See All",
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Bold,
-                        color = MintGreen
+                        color = colors.primary
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                         contentDescription = "See All",
-                        tint = MintGreen,
+                        tint = colors.primary,
                         modifier = Modifier.size(14.dp)
                     )
                 }
             }
         }
 
-        // 7. Recent Transactions List or Delightful Empty State
+        // 7. Recent Transactions List or Clean Empty State
         if (uiState.recentExpenses.isEmpty()) {
             item {
                 Surface(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(20.dp))
-                        .border(1.dp, DarkBorder, RoundedCornerShape(20.dp)),
-                    color = DarkSurface
+                        .border(1.dp, colors.border, RoundedCornerShape(20.dp)),
+                    color = colors.surface
                 ) {
                     Column(
                         modifier = Modifier
@@ -495,13 +465,13 @@ fun DashboardScreen(
                             modifier = Modifier
                                 .size(56.dp)
                                 .clip(CircleShape)
-                                .background(MintGreen.copy(alpha = 0.12f)),
+                                .background(colors.primary.copy(alpha = 0.12f)),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ReceiptLong,
                                 contentDescription = null,
-                                tint = MintGreen,
+                                tint = colors.primary,
                                 modifier = Modifier.size(28.dp)
                             )
                         }
@@ -510,13 +480,13 @@ fun DashboardScreen(
                             text = "No recent transactions",
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold,
-                            color = TextPrimary
+                            color = colors.textPrimary
                         )
                         Spacer(modifier = Modifier.height(6.dp))
                         Text(
-                            text = "Expenses added manually or detected from UPI will appear here instantly.",
+                            text = "Expenses added manually or detected from UPI will appear here.",
                             fontSize = 13.sp,
-                            color = TextSecondary,
+                            color = colors.textSecondary,
                             textAlign = androidx.compose.ui.text.style.TextAlign.Center
                         )
                     }
@@ -533,7 +503,7 @@ fun DashboardScreen(
         }
 
         item {
-            Spacer(modifier = Modifier.height(80.dp)) // Padding for bottom bar
+            Spacer(modifier = Modifier.height(80.dp))
         }
     }
 }

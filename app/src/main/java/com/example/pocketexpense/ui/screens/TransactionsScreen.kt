@@ -40,15 +40,7 @@ import androidx.compose.ui.unit.sp
 import com.example.pocketexpense.data.model.Expense
 import com.example.pocketexpense.ui.components.CategoryIconHelper
 import com.example.pocketexpense.ui.components.ExpenseItemCard
-import com.example.pocketexpense.ui.theme.DarkBorder
-import com.example.pocketexpense.ui.theme.DarkSurface
-import com.example.pocketexpense.ui.theme.DarkSurfaceElevated
-import com.example.pocketexpense.ui.theme.DarkSurfaceHighlight
-import com.example.pocketexpense.ui.theme.MintGreen
-import com.example.pocketexpense.ui.theme.MintGreenContainer
-import com.example.pocketexpense.ui.theme.TextPrimary
-import com.example.pocketexpense.ui.theme.TextSecondary
-import com.example.pocketexpense.ui.theme.TextTertiary
+import com.example.pocketexpense.ui.theme.AppTheme
 import com.example.pocketexpense.ui.viewmodel.TransactionsUiState
 import com.example.pocketexpense.util.CurrencyUtils
 
@@ -61,6 +53,7 @@ fun TransactionsScreen(
     onDeleteExpense: (Expense) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val colors = AppTheme.colors
     val totalFilteredPaise = uiState.filteredExpenses.sumOf { it.expense.amountInPaise }
 
     Column(
@@ -81,28 +74,28 @@ fun TransactionsScreen(
                     text = "Transactions",
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Black,
-                    color = TextPrimary,
+                    color = colors.textPrimary,
                     letterSpacing = (-0.5).sp
                 )
                 Text(
                     text = "History & Search",
                     fontSize = 12.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = MintGreen
+                    color = colors.primary
                 )
             }
 
             // Total Filtered Amount Badge
             Surface(
                 shape = RoundedCornerShape(12.dp),
-                color = MintGreenContainer.copy(alpha = 0.5f),
-                border = androidx.compose.foundation.BorderStroke(1.dp, MintGreen.copy(alpha = 0.3f))
+                color = colors.primaryContainer.copy(alpha = 0.5f),
+                border = androidx.compose.foundation.BorderStroke(1.dp, colors.primary.copy(alpha = 0.3f))
             ) {
                 Text(
                     text = CurrencyUtils.paiseToRupeesString(totalFilteredPaise),
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Bold,
-                    color = MintGreen,
+                    color = colors.primary,
                     modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
                 )
             }
@@ -114,12 +107,12 @@ fun TransactionsScreen(
         OutlinedTextField(
             value = uiState.searchQuery,
             onValueChange = onSearchQueryChange,
-            placeholder = { Text("Search by title, note, or merchant...", fontSize = 14.sp, color = TextTertiary) },
+            placeholder = { Text("Search by title, note, or merchant...", fontSize = 14.sp, color = colors.textTertiary) },
             leadingIcon = {
                 Icon(
                     imageVector = Icons.Default.Search,
                     contentDescription = "Search",
-                    tint = if (uiState.searchQuery.isNotEmpty()) MintGreen else TextSecondary,
+                    tint = if (uiState.searchQuery.isNotEmpty()) colors.primary else colors.textSecondary,
                     modifier = Modifier.size(20.dp)
                 )
             },
@@ -129,7 +122,7 @@ fun TransactionsScreen(
                         Icon(
                             imageVector = Icons.Default.Clear,
                             contentDescription = "Clear",
-                            tint = TextSecondary,
+                            tint = colors.textSecondary,
                             modifier = Modifier.size(18.dp)
                         )
                     }
@@ -139,12 +132,12 @@ fun TransactionsScreen(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(20.dp),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = MintGreen,
-                unfocusedBorderColor = DarkBorder,
-                focusedTextColor = TextPrimary,
-                unfocusedTextColor = TextPrimary,
-                focusedContainerColor = DarkSurfaceElevated,
-                unfocusedContainerColor = DarkSurface
+                focusedBorderColor = colors.primary,
+                unfocusedBorderColor = colors.border,
+                focusedTextColor = colors.textPrimary,
+                unfocusedTextColor = colors.textPrimary,
+                focusedContainerColor = colors.surfaceElevated,
+                unfocusedContainerColor = colors.surface
             )
         )
 
@@ -161,8 +154,8 @@ fun TransactionsScreen(
                 Row(
                     modifier = Modifier
                         .clip(RoundedCornerShape(14.dp))
-                        .background(if (isAllSelected) MintGreen else DarkSurface)
-                        .border(1.dp, if (isAllSelected) MintGreen else DarkBorder, RoundedCornerShape(14.dp))
+                        .background(if (isAllSelected) colors.primary else colors.surface)
+                        .border(1.dp, if (isAllSelected) colors.primary else colors.border, RoundedCornerShape(14.dp))
                         .clickable { onCategorySelect(null) }
                         .padding(horizontal = 14.dp, vertical = 8.dp),
                     verticalAlignment = Alignment.CenterVertically
@@ -171,7 +164,7 @@ fun TransactionsScreen(
                         text = "All",
                         fontSize = 13.sp,
                         fontWeight = if (isAllSelected) FontWeight.Bold else FontWeight.Medium,
-                        color = if (isAllSelected) Color.Black else TextSecondary
+                        color = if (isAllSelected) (if (colors.isDark) Color.Black else Color.White) else colors.textSecondary
                     )
                 }
             }
@@ -184,8 +177,8 @@ fun TransactionsScreen(
                 Row(
                     modifier = Modifier
                         .clip(RoundedCornerShape(14.dp))
-                        .background(if (isSelected) catColor.copy(alpha = 0.22f) else DarkSurface)
-                        .border(1.dp, if (isSelected) catColor else DarkBorder, RoundedCornerShape(14.dp))
+                        .background(if (isSelected) catColor.copy(alpha = 0.22f) else colors.surface)
+                        .border(1.dp, if (isSelected) catColor else colors.border, RoundedCornerShape(14.dp))
                         .clickable { onCategorySelect(category.id) }
                         .padding(horizontal = 12.dp, vertical = 8.dp),
                     verticalAlignment = Alignment.CenterVertically
@@ -209,7 +202,7 @@ fun TransactionsScreen(
                         text = category.name,
                         fontSize = 13.sp,
                         fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                        color = if (isSelected) TextPrimary else TextSecondary
+                        color = if (isSelected) colors.textPrimary else colors.textSecondary
                     )
                 }
             }
@@ -217,12 +210,12 @@ fun TransactionsScreen(
 
         Spacer(modifier = Modifier.height(14.dp))
 
-        // Transaction Count & Results
+        // Transaction Count
         Text(
             text = "${uiState.filteredExpenses.size} ${if (uiState.filteredExpenses.size == 1) "transaction" else "transactions"}",
             fontSize = 13.sp,
             fontWeight = FontWeight.SemiBold,
-            color = TextTertiary
+            color = colors.textTertiary
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -233,8 +226,8 @@ fun TransactionsScreen(
                     .fillMaxWidth()
                     .padding(top = 16.dp)
                     .clip(RoundedCornerShape(22.dp))
-                    .border(1.dp, DarkBorder, RoundedCornerShape(22.dp)),
-                color = DarkSurface
+                    .border(1.dp, colors.border, RoundedCornerShape(22.dp)),
+                color = colors.surface
             ) {
                 Column(
                     modifier = Modifier
@@ -246,13 +239,13 @@ fun TransactionsScreen(
                         modifier = Modifier
                             .size(52.dp)
                             .clip(CircleShape)
-                            .background(DarkSurfaceHighlight),
+                            .background(colors.surfaceHighlight),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ReceiptLong,
                             contentDescription = null,
-                            tint = TextSecondary,
+                            tint = colors.textSecondary,
                             modifier = Modifier.size(26.dp)
                         )
                     }
@@ -261,7 +254,7 @@ fun TransactionsScreen(
                         text = "No transactions found",
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
-                        color = TextPrimary
+                        color = colors.textPrimary
                     )
                     Spacer(modifier = Modifier.height(6.dp))
                     Text(
@@ -270,7 +263,7 @@ fun TransactionsScreen(
                         else
                             "Record an expense using the + button or quick shortcut.",
                         fontSize = 13.sp,
-                        color = TextSecondary,
+                        color = colors.textSecondary,
                         textAlign = androidx.compose.ui.text.style.TextAlign.Center
                     )
                 }

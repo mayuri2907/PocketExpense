@@ -63,15 +63,9 @@ import com.example.pocketexpense.parser.AutoCategoryMapper
 import com.example.pocketexpense.quick.QuickExpenseDraft
 import com.example.pocketexpense.quick.QuickExpenseDraftManager
 import com.example.pocketexpense.ui.theme.AmberGold
+import com.example.pocketexpense.ui.theme.AppTheme
 import com.example.pocketexpense.ui.theme.CoralRed
-import com.example.pocketexpense.ui.theme.DarkBorder
-import com.example.pocketexpense.ui.theme.DarkSurface
-import com.example.pocketexpense.ui.theme.DarkSurfaceElevated
 import com.example.pocketexpense.ui.theme.ElectricPurple
-import com.example.pocketexpense.ui.theme.MintGreen
-import com.example.pocketexpense.ui.theme.TextPrimary
-import com.example.pocketexpense.ui.theme.TextSecondary
-import com.example.pocketexpense.ui.theme.TextTertiary
 import com.example.pocketexpense.util.CurrencyUtils
 import kotlinx.coroutines.delay
 
@@ -120,6 +114,7 @@ fun QuickExpenseFormCard(
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val colors = AppTheme.colors
     val existingDraft = remember { QuickExpenseDraftManager.getDraft() }
     val isResumingDraft = existingDraft != null
 
@@ -171,7 +166,7 @@ fun QuickExpenseFormCard(
     val progress = (remainingMillis.toFloat() / totalCountdownMillis.toFloat()).coerceIn(0f, 1f)
     val progressColor by animateColorAsState(
         targetValue = when {
-            hasUserInteracted -> MintGreen
+            hasUserInteracted -> colors.primary
             progress > 0.4f -> ElectricPurple
             progress > 0.2f -> AmberGold
             else -> CoralRed
@@ -183,8 +178,8 @@ fun QuickExpenseFormCard(
         modifier = modifier
             .fillMaxWidth(0.94f)
             .clip(RoundedCornerShape(24.dp))
-            .border(1.dp, DarkBorder, RoundedCornerShape(24.dp)),
-        color = DarkSurface
+            .border(1.dp, colors.border, RoundedCornerShape(24.dp)),
+        color = colors.surface
     ) {
         Column(
             modifier = Modifier
@@ -218,12 +213,12 @@ fun QuickExpenseFormCard(
                             text = "Quick Expense",
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold,
-                            color = TextPrimary
+                            color = colors.textPrimary
                         )
                         Text(
-                            text = if (hasUserInteracted) "Timer paused • Draft preserved" else "Auto-closing in ${(remainingMillis + 999) / 1000}s",
+                            text = if (hasUserInteracted) "Timer paused • Draft saved" else "Auto-closing in ${(remainingMillis + 999) / 1000}s",
                             fontSize = 11.sp,
-                            color = if (hasUserInteracted) MintGreen else TextSecondary
+                            color = if (hasUserInteracted) colors.primary else colors.textSecondary
                         )
                     }
                 }
@@ -240,7 +235,7 @@ fun QuickExpenseFormCard(
                     Icon(
                         imageVector = Icons.Default.Close,
                         contentDescription = "Close",
-                        tint = TextSecondary,
+                        tint = colors.textSecondary,
                         modifier = Modifier.size(20.dp)
                     )
                 }
@@ -256,7 +251,7 @@ fun QuickExpenseFormCard(
                     .height(4.dp)
                     .clip(CircleShape),
                 color = progressColor,
-                trackColor = DarkSurfaceElevated
+                trackColor = colors.surfaceElevated
             )
 
             // Resumed draft banner if draft was restored
@@ -319,7 +314,7 @@ fun QuickExpenseFormCard(
                         text = "₹",
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Bold,
-                        color = MintGreen,
+                        color = colors.primary,
                         modifier = Modifier.padding(start = 12.dp)
                     )
                 },
@@ -334,12 +329,12 @@ fun QuickExpenseFormCard(
                     .focusRequester(amountFocusRequester),
                 shape = RoundedCornerShape(16.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = MintGreen,
-                    unfocusedBorderColor = DarkBorder,
-                    focusedTextColor = TextPrimary,
-                    unfocusedTextColor = TextPrimary,
-                    focusedContainerColor = DarkSurfaceElevated,
-                    unfocusedContainerColor = DarkSurfaceElevated
+                    focusedBorderColor = colors.primary,
+                    unfocusedBorderColor = colors.border,
+                    focusedTextColor = colors.textPrimary,
+                    unfocusedTextColor = colors.textPrimary,
+                    focusedContainerColor = colors.surfaceElevated,
+                    unfocusedContainerColor = colors.surfaceElevated
                 )
             )
 
@@ -354,8 +349,8 @@ fun QuickExpenseFormCard(
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(8.dp))
-                            .background(DarkSurfaceElevated)
-                            .border(1.dp, DarkBorder, RoundedCornerShape(8.dp))
+                            .background(colors.surfaceElevated)
+                            .border(1.dp, colors.border, RoundedCornerShape(8.dp))
                             .clickable {
                                 hasUserInteracted = true
                                 val currentVal = amountText.toDoubleOrNull() ?: 0.0
@@ -369,7 +364,7 @@ fun QuickExpenseFormCard(
                             text = "+₹$quickVal",
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
-                            color = MintGreen
+                            color = colors.primary
                         )
                     }
                 }
@@ -400,12 +395,12 @@ fun QuickExpenseFormCard(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = MintGreen,
-                    unfocusedBorderColor = DarkBorder,
-                    focusedTextColor = TextPrimary,
-                    unfocusedTextColor = TextPrimary,
-                    focusedContainerColor = DarkSurfaceElevated,
-                    unfocusedContainerColor = DarkSurfaceElevated
+                    focusedBorderColor = colors.primary,
+                    unfocusedBorderColor = colors.border,
+                    focusedTextColor = colors.textPrimary,
+                    unfocusedTextColor = colors.textPrimary,
+                    focusedContainerColor = colors.surfaceElevated,
+                    unfocusedContainerColor = colors.surfaceElevated
                 )
             )
 
@@ -416,7 +411,7 @@ fun QuickExpenseFormCard(
                 text = "Category",
                 fontSize = 12.sp,
                 fontWeight = FontWeight.SemiBold,
-                color = TextSecondary
+                color = colors.textSecondary
             )
             Spacer(modifier = Modifier.height(6.dp))
 
@@ -430,16 +425,16 @@ fun QuickExpenseFormCard(
                     val catColor = try {
                         Color(android.graphics.Color.parseColor(category.colorHex))
                     } catch (_: Exception) {
-                        MintGreen
+                        colors.primary
                     }
 
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(10.dp))
-                            .background(if (isSelected) catColor.copy(alpha = 0.2f) else DarkSurfaceElevated)
+                            .background(if (isSelected) catColor.copy(alpha = 0.2f) else colors.surfaceElevated)
                             .border(
                                 width = 1.dp,
-                                color = if (isSelected) catColor else DarkBorder,
+                                color = if (isSelected) catColor else colors.border,
                                 shape = RoundedCornerShape(10.dp)
                             )
                             .clickable {
@@ -453,14 +448,14 @@ fun QuickExpenseFormCard(
                                 imageVector = CategoryIconHelper.getIcon(category.iconName),
                                 contentDescription = null,
                                 modifier = Modifier.size(14.dp),
-                                tint = if (isSelected) catColor else TextSecondary
+                                tint = if (isSelected) catColor else colors.textSecondary
                             )
                             Spacer(modifier = Modifier.width(6.dp))
                             Text(
                                 text = category.name,
                                 fontSize = 12.sp,
                                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                                color = if (isSelected) catColor else TextSecondary
+                                color = if (isSelected) catColor else colors.textSecondary
                             )
                         }
                     }
@@ -517,8 +512,8 @@ fun QuickExpenseFormCard(
                 enabled = !isSaving,
                 shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = MintGreen,
-                    contentColor = Color.Black
+                    containerColor = colors.primary,
+                    contentColor = if (colors.isDark) Color.Black else Color.White
                 )
             ) {
                 Icon(

@@ -75,7 +75,7 @@ class QuickExpenseAccessibilityService : AccessibilityService() {
             val now = getMonotonicTime()
             val delta = now - lastVolumeUpTimestamp
 
-            if (delta in 100L..450L) {
+            if (delta in 40L..600L) {
                 // Double-press detected! Reset timestamp immediately
                 lastVolumeUpTimestamp = 0L
 
@@ -95,12 +95,11 @@ class QuickExpenseAccessibilityService : AccessibilityService() {
                     // PocketExpense is in the foreground: notify Activity
                     QuickExpenseTriggerCoordinator.notifyForegroundTrigger()
                 } else {
-                    // PocketExpense is in the background:
-                    if (OverlayPermissionHelper.canDrawOverlays(this)) {
-                        val app = applicationContext as? PocketExpenseApplication
-                        if (app != null) {
-                            QuickExpenseOverlayManager.show(this, app.repository)
-                        }
+                    // PocketExpense is in the background or closed:
+                    val app = (application as? PocketExpenseApplication)
+                        ?: (applicationContext as? PocketExpenseApplication)
+                    if (OverlayPermissionHelper.canDrawOverlays(this) && app != null) {
+                        QuickExpenseOverlayManager.show(this, app.repository)
                     } else {
                         // Fallback: Launch MainActivity with Quick Expense intent
                         val intent = Intent(this, MainActivity::class.java).apply {

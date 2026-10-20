@@ -31,14 +31,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.pocketexpense.data.model.ExpenseWithCategory
+import com.example.pocketexpense.ui.theme.AppTheme
 import com.example.pocketexpense.ui.theme.CoralRed
-import com.example.pocketexpense.ui.theme.DarkBorder
-import com.example.pocketexpense.ui.theme.DarkSurface
-import com.example.pocketexpense.ui.theme.DarkSurfaceElevated
-import com.example.pocketexpense.ui.theme.MintGreen
-import com.example.pocketexpense.ui.theme.TextPrimary
-import com.example.pocketexpense.ui.theme.TextSecondary
-import com.example.pocketexpense.ui.theme.TextTertiary
 import com.example.pocketexpense.util.CurrencyUtils
 import com.example.pocketexpense.util.DateUtils
 
@@ -49,6 +43,7 @@ fun ExpenseItemCard(
     onDeleteClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val colors = AppTheme.colors
     val category = item.category
     val expense = item.expense
     val categoryColor = CategoryIconHelper.parseColor(category.colorHex)
@@ -57,9 +52,9 @@ fun ExpenseItemCard(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(18.dp))
-            .border(1.dp, DarkBorder, RoundedCornerShape(18.dp))
+            .border(1.dp, colors.border, RoundedCornerShape(18.dp))
             .clickable { onEditClick() },
-        color = DarkSurface
+        color = colors.surface
     ) {
         Row(
             modifier = Modifier
@@ -97,7 +92,7 @@ fun ExpenseItemCard(
                         text = expense.title,
                         fontSize = 15.sp,
                         fontWeight = FontWeight.Bold,
-                        color = TextPrimary,
+                        color = colors.textPrimary,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -118,7 +113,7 @@ fun ExpenseItemCard(
                         Text(
                             text = "  ${DateUtils.formatDate(expense.timestamp)}",
                             fontSize = 11.sp,
-                            color = TextTertiary
+                            color = colors.textTertiary
                         )
                     }
                     if (expense.note.isNotBlank()) {
@@ -126,7 +121,7 @@ fun ExpenseItemCard(
                         Text(
                             text = expense.note,
                             fontSize = 12.sp,
-                            color = TextSecondary,
+                            color = colors.textSecondary,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
@@ -144,7 +139,7 @@ fun ExpenseItemCard(
                     text = CurrencyUtils.paiseToRupeesString(expense.amountInPaise),
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Black,
-                    color = MintGreen
+                    color = colors.primary
                 )
 
                 Spacer(modifier = Modifier.height(2.dp))
@@ -160,7 +155,7 @@ fun ExpenseItemCard(
                         Icon(
                             imageVector = Icons.Default.Edit,
                             contentDescription = "Edit",
-                            tint = TextSecondary,
+                            tint = colors.textSecondary,
                             modifier = Modifier.size(16.dp)
                         )
                     }

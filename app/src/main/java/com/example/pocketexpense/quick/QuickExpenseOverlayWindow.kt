@@ -71,14 +71,15 @@ class QuickExpenseOverlayWindow(private val context: Context) {
                 val overlayLifecycle = OverlayLifecycleOwner()
                 lifecycleOwner = overlayLifecycle
 
-                // Pre-fetch categories asynchronously while presenting default categories immediately
-                var activeCategories = Category.defaultCategories()
+                val categoriesState = androidx.compose.runtime.mutableStateOf(Category.defaultCategories())
                 overlayScope.launch {
                     val dbCategories = repository.getAllCategoriesList()
                     if (dbCategories.isNotEmpty()) {
-                        activeCategories = dbCategories
+                        categoriesState.value = dbCategories
                     }
                 }
+
+                val userThemeMode = com.example.pocketexpense.util.ThemePreferences.getThemeMode(context)
 
                 val view = ComposeView(context).apply {
                     setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindow)
@@ -99,7 +100,7 @@ class QuickExpenseOverlayWindow(private val context: Context) {
                     }
 
                     setContent {
-                        PocketExpenseTheme {
+                        PocketExpenseTheme(themeMode = userThemeMode) {
                             Box(
                                 modifier = Modifier
                                     .fillMaxSize()
@@ -114,7 +115,7 @@ class QuickExpenseOverlayWindow(private val context: Context) {
                                 contentAlignment = Alignment.Center
                             ) {
                                 QuickExpenseFormCard(
-                                    categories = activeCategories,
+                                    categories = categoriesState.value,
                                     onSaveExpense = { amountPaise, description, categoryId ->
                                         overlayScope.launch {
                                             val expense = Expense(

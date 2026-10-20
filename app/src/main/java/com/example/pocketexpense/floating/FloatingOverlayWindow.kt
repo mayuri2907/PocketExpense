@@ -45,10 +45,13 @@ class FloatingOverlayWindow(private val context: Context) {
                     setViewTreeViewModelStoreOwner(overlayLifecycle)
 
                     setContent {
-                        FloatingExpensePopupContent(
-                            item = item,
-                            totalCountdownMillis = 3000L
-                        )
+                        val userThemeMode = com.example.pocketexpense.util.ThemePreferences.getThemeMode(context)
+                        com.example.pocketexpense.ui.theme.PocketExpenseTheme(themeMode = userThemeMode) {
+                            FloatingExpensePopupContent(
+                                item = item,
+                                totalCountdownMillis = 3000L
+                            )
+                        }
                     }
                 }
 

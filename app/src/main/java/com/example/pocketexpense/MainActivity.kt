@@ -27,10 +27,13 @@ class MainActivity : ComponentActivity() {
 
     private var showQuickExpenseTrigger by mutableStateOf(false)
     private var lastVolumeUpTimestamp = 0L
+    private var currentThemeMode by mutableStateOf(com.example.pocketexpense.util.ThemeMode.SYSTEM)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        currentThemeMode = com.example.pocketexpense.util.ThemePreferences.getThemeMode(this)
 
         // Sync optional persistent notification state with user preference
         QuickNotificationHelper.updateState(this)
@@ -38,11 +41,16 @@ class MainActivity : ComponentActivity() {
         handleIntent(intent)
 
         setContent {
-            PocketExpenseTheme {
+            PocketExpenseTheme(themeMode = currentThemeMode) {
                 MainScreen(
                     viewModel = viewModel,
                     isQuickExpenseTriggered = showQuickExpenseTrigger,
-                    onQuickExpenseHandled = { showQuickExpenseTrigger = false }
+                    onQuickExpenseHandled = { showQuickExpenseTrigger = false },
+                    currentThemeMode = currentThemeMode,
+                    onThemeChanged = { mode ->
+                        com.example.pocketexpense.util.ThemePreferences.setThemeMode(this@MainActivity, mode)
+                        currentThemeMode = mode
+                    }
                 )
             }
         }
@@ -86,7 +94,7 @@ class MainActivity : ComponentActivity() {
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
         if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
             val now = SystemClock.uptimeMillis()
-            if (now - lastVolumeUpTimestamp in 100..450) {
+            if (now - lastVolumeUpTimestamp in 40..600) {
                 lastVolumeUpTimestamp = 0L
                 if (QuickExpenseTriggerCoordinator.tryTrigger()) {
                     showQuickExpenseTrigger = true

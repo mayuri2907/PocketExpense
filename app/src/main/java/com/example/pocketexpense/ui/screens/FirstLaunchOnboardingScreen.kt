@@ -25,6 +25,7 @@ import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Shield
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -36,26 +37,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.pocketexpense.floating.OverlayPermissionHelper
 import com.example.pocketexpense.service.ExpenseNotificationListenerService
 import com.example.pocketexpense.ui.theme.AmberWarning
-import com.example.pocketexpense.ui.theme.DarkBackground
-import com.example.pocketexpense.ui.theme.DarkBorder
-import com.example.pocketexpense.ui.theme.DarkSurface
-import com.example.pocketexpense.ui.theme.DarkSurfaceElevated
+import com.example.pocketexpense.ui.theme.AppTheme
 import com.example.pocketexpense.ui.theme.ElectricPurple
-import com.example.pocketexpense.ui.theme.MintGreen
-import com.example.pocketexpense.ui.theme.TextPrimary
-import com.example.pocketexpense.ui.theme.TextSecondary
-import com.example.pocketexpense.ui.theme.TextTertiary
-import com.example.pocketexpense.util.NotificationPermissionHelper
 import com.example.pocketexpense.util.OnboardingPreferences
 
 @Composable
@@ -63,17 +54,17 @@ fun FirstLaunchOnboardingScreen(
     isNotificationListenerEnabled: Boolean,
     isOverlayPermissionEnabled: Boolean,
     isServiceConnected: Boolean,
-    onEnableNotificationAccess: () -> Unit,
+    onEnableNotificationListener: () -> Unit,
     onEnableOverlayPermission: () -> Unit,
     onCompleteOnboarding: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
+    val colors = AppTheme.colors
 
-    Box(
-        modifier = modifier
-            .fillMaxSize()
-            .background(DarkBackground)
+    Surface(
+        modifier = modifier.fillMaxSize(),
+        color = colors.background
     ) {
         Column(
             modifier = Modifier
@@ -82,28 +73,21 @@ fun FirstLaunchOnboardingScreen(
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.height(28.dp))
+            Spacer(modifier = Modifier.height(36.dp))
 
             // App Brand Header
             Box(
                 modifier = Modifier
-                    .size(64.dp)
+                    .size(68.dp)
                     .clip(CircleShape)
-                    .background(
-                        Brush.linearGradient(
-                            listOf(
-                                ElectricPurple.copy(alpha = 0.3f),
-                                MintGreen.copy(alpha = 0.2f)
-                            )
-                        )
-                    )
-                    .border(1.dp, MintGreen.copy(alpha = 0.4f), CircleShape),
+                    .background(colors.primary.copy(alpha = 0.15f))
+                    .border(1.dp, colors.primary.copy(alpha = 0.4f), CircleShape),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = Icons.Default.Security,
                     contentDescription = "PocketExpense Logo",
-                    tint = MintGreen,
+                    tint = colors.primary,
                     modifier = Modifier.size(34.dp)
                 )
             }
@@ -114,26 +98,26 @@ fun FirstLaunchOnboardingScreen(
                 text = "Welcome to PocketExpense",
                 fontSize = 22.sp,
                 fontWeight = FontWeight.ExtraBold,
-                color = TextPrimary,
+                color = colors.textPrimary,
                 textAlign = TextAlign.Center
             )
 
             Spacer(modifier = Modifier.height(6.dp))
 
             Text(
-                text = "Local-First Automatic UPI Expense Tracker",
+                text = "Smart & Private Expense Tracker",
                 fontSize = 13.sp,
                 fontWeight = FontWeight.Medium,
-                color = MintGreen,
+                color = colors.primary,
                 textAlign = TextAlign.Center
             )
 
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = "To automatically record your UPI payments without manual entry, PocketExpense needs permission to read payment alerts and optionally show a 3-second category popup.",
+                text = "PocketExpense needs permission to log payment alerts and optionally show a quick category popup.",
                 fontSize = 13.sp,
-                color = TextSecondary,
+                color = colors.textSecondary,
                 lineHeight = 18.sp,
                 textAlign = TextAlign.Center
             )
@@ -147,10 +131,10 @@ fun FirstLaunchOnboardingScreen(
                     .clip(RoundedCornerShape(20.dp))
                     .border(
                         width = 1.dp,
-                        color = if (isNotificationListenerEnabled) MintGreen.copy(alpha = 0.4f) else DarkBorder,
+                        color = if (isNotificationListenerEnabled) colors.primary.copy(alpha = 0.4f) else colors.border,
                         shape = RoundedCornerShape(20.dp)
                     ),
-                color = DarkSurface
+                color = colors.surface
             ) {
                 Column(modifier = Modifier.padding(18.dp)) {
                     Row(
@@ -164,7 +148,7 @@ fun FirstLaunchOnboardingScreen(
                                     .size(36.dp)
                                     .clip(CircleShape)
                                     .background(
-                                        if (isNotificationListenerEnabled) MintGreen.copy(alpha = 0.15f)
+                                        if (isNotificationListenerEnabled) colors.primary.copy(alpha = 0.15f)
                                         else AmberWarning.copy(alpha = 0.15f)
                                     ),
                                 contentAlignment = Alignment.Center
@@ -172,7 +156,7 @@ fun FirstLaunchOnboardingScreen(
                                 Icon(
                                     imageVector = if (isNotificationListenerEnabled) Icons.Default.CheckCircle else Icons.Default.NotificationsActive,
                                     contentDescription = null,
-                                    tint = if (isNotificationListenerEnabled) MintGreen else AmberWarning,
+                                    tint = if (isNotificationListenerEnabled) colors.primary else AmberWarning,
                                     modifier = Modifier.size(20.dp)
                                 )
                             }
@@ -182,13 +166,13 @@ fun FirstLaunchOnboardingScreen(
                                     text = "1. Notification Access",
                                     fontSize = 15.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = TextPrimary
+                                    color = colors.textPrimary
                                 )
                                 Text(
-                                    text = "Required for auto-tracking",
+                                    text = "Required for automatic tracking",
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.SemiBold,
-                                    color = if (isNotificationListenerEnabled) MintGreen else AmberWarning
+                                    color = if (isNotificationListenerEnabled) colors.primary else AmberWarning
                                 )
                             }
                         }
@@ -197,16 +181,16 @@ fun FirstLaunchOnboardingScreen(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(8.dp))
                                 .background(
-                                    if (isNotificationListenerEnabled) MintGreen.copy(alpha = 0.15f)
-                                    else AmberWarning.copy(alpha = 0.15f)
+                                    if (isNotificationListenerEnabled) colors.primary.copy(alpha = 0.2f)
+                                    else AmberWarning.copy(alpha = 0.2f)
                                 )
                                 .padding(horizontal = 8.dp, vertical = 4.dp)
                         ) {
                             Text(
-                                text = if (isNotificationListenerEnabled) "GRANTED" else "ACTION REQUIRED",
+                                text = if (isNotificationListenerEnabled) "GRANTED" else "REQUIRED",
                                 fontSize = 10.sp,
-                                fontWeight = FontWeight.ExtraBold,
-                                color = if (isNotificationListenerEnabled) MintGreen else AmberWarning
+                                fontWeight = FontWeight.Bold,
+                                color = if (isNotificationListenerEnabled) colors.primary else AmberWarning
                             )
                         }
                     }
@@ -214,9 +198,9 @@ fun FirstLaunchOnboardingScreen(
                     Spacer(modifier = Modifier.height(10.dp))
 
                     Text(
-                        text = "Why it's needed: Reads transaction alerts from Google Pay, PhonePe, Paytm, and CRED in real-time to log amounts and merchants automatically.",
+                        text = "Why it's needed: Reads payment notifications from UPI apps (GPay, PhonePe, Paytm, CRED) to automatically record transactions.",
                         fontSize = 12.sp,
-                        color = TextSecondary,
+                        color = colors.textSecondary,
                         lineHeight = 17.sp
                     )
 
@@ -226,27 +210,27 @@ fun FirstLaunchOnboardingScreen(
                         Icon(
                             imageVector = Icons.Default.Shield,
                             contentDescription = null,
-                            tint = TextTertiary,
+                            tint = colors.textTertiary,
                             modifier = Modifier.size(13.dp)
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            text = "100% on-device. Never reads or logs OTPs, PINs, or bank passwords.",
+                            text = "100% on-device. Never reads personal chats, OTPs, or passwords.",
                             fontSize = 11.sp,
-                            color = TextTertiary
+                            color = colors.textTertiary
                         )
                     }
 
                     if (!isNotificationListenerEnabled) {
                         Spacer(modifier = Modifier.height(14.dp))
                         Button(
-                            onClick = onEnableNotificationAccess,
+                            onClick = onEnableNotificationListener,
                             shape = RoundedCornerShape(12.dp),
+                            modifier = Modifier.fillMaxWidth(),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = MintGreen,
-                                contentColor = Color.Black
-                            ),
-                            modifier = Modifier.fillMaxWidth()
+                                containerColor = colors.primary,
+                                contentColor = if (colors.isDark) Color.Black else Color.White
+                            )
                         ) {
                             Text(
                                 text = "Enable Notification Access",
@@ -266,7 +250,7 @@ fun FirstLaunchOnboardingScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(8.dp))
-                                .background(DarkSurfaceElevated)
+                                .background(colors.surfaceElevated)
                                 .padding(8.dp),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween
@@ -274,12 +258,12 @@ fun FirstLaunchOnboardingScreen(
                             Text(
                                 text = "Permission granted • Connecting listener...",
                                 fontSize = 11.sp,
-                                color = TextSecondary
+                                color = colors.textSecondary
                             )
                             TextButton(
                                 onClick = { ExpenseNotificationListenerService.tryRebind(context) }
                             ) {
-                                Text("Rebind", fontSize = 11.sp, color = MintGreen)
+                                Text("Rebind", fontSize = 11.sp, color = colors.primary)
                             }
                         }
                     }
@@ -295,10 +279,10 @@ fun FirstLaunchOnboardingScreen(
                     .clip(RoundedCornerShape(20.dp))
                     .border(
                         width = 1.dp,
-                        color = if (isOverlayPermissionEnabled) ElectricPurple.copy(alpha = 0.4f) else DarkBorder,
+                        color = if (isOverlayPermissionEnabled) ElectricPurple.copy(alpha = 0.4f) else colors.border,
                         shape = RoundedCornerShape(20.dp)
                     ),
-                color = DarkSurface
+                color = colors.surface
             ) {
                 Column(modifier = Modifier.padding(18.dp)) {
                     Row(
@@ -324,13 +308,13 @@ fun FirstLaunchOnboardingScreen(
                             Spacer(modifier = Modifier.width(12.dp))
                             Column {
                                 Text(
-                                    text = "2. 3-Second Category Popup",
+                                    text = "2. Quick Entry & Popup",
                                     fontSize = 15.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = TextPrimary
+                                    color = colors.textPrimary
                                 )
                                 Text(
-                                    text = "Optional quick categorizer",
+                                    text = "Floating entry & category popup",
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.SemiBold,
                                     color = ElectricPurple
@@ -343,7 +327,7 @@ fun FirstLaunchOnboardingScreen(
                                 .clip(RoundedCornerShape(8.dp))
                                 .background(
                                     if (isOverlayPermissionEnabled) ElectricPurple.copy(alpha = 0.2f)
-                                    else DarkSurfaceElevated
+                                    else colors.surfaceElevated
                                 )
                                 .padding(horizontal = 8.dp, vertical = 4.dp)
                         ) {
@@ -351,7 +335,7 @@ fun FirstLaunchOnboardingScreen(
                                 text = if (isOverlayPermissionEnabled) "ENABLED" else "OPTIONAL",
                                 fontSize = 10.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = if (isOverlayPermissionEnabled) ElectricPurple else TextSecondary
+                                color = if (isOverlayPermissionEnabled) ElectricPurple else colors.textSecondary
                             )
                         }
                     }
@@ -359,9 +343,9 @@ fun FirstLaunchOnboardingScreen(
                     Spacer(modifier = Modifier.height(10.dp))
 
                     Text(
-                        text = "Why it's needed: Shows a compact 3-second popup over your UPI app right after paying, letting you tap a category before auto-saving.",
+                        text = "Why it's needed: Shows the 5-second Quick Expense dialog or category popup directly over other apps.",
                         fontSize = 12.sp,
-                        color = TextSecondary,
+                        color = colors.textSecondary,
                         lineHeight = 17.sp
                     )
 
@@ -371,14 +355,14 @@ fun FirstLaunchOnboardingScreen(
                         Icon(
                             imageVector = Icons.Default.Shield,
                             contentDescription = null,
-                            tint = TextTertiary,
+                            tint = colors.textTertiary,
                             modifier = Modifier.size(13.dp)
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            text = "Unobtrusive top banner. Never interferes with PIN or OTP screens.",
+                            text = "Unobtrusive. Never interferes with PIN or bank screens.",
                             fontSize = 11.sp,
-                            color = TextTertiary
+                            color = colors.textTertiary
                         )
                     }
 
@@ -388,7 +372,7 @@ fun FirstLaunchOnboardingScreen(
                             onClick = onEnableOverlayPermission,
                             shape = RoundedCornerShape(12.dp),
                             modifier = Modifier.fillMaxWidth(),
-                            colors = ButtonDefaults.outlinedButtonColors(contentColor = TextPrimary),
+                            colors = ButtonDefaults.outlinedButtonColors(contentColor = colors.textPrimary),
                             border = androidx.compose.foundation.BorderStroke(1.dp, ElectricPurple)
                         ) {
                             Text(
@@ -411,7 +395,7 @@ fun FirstLaunchOnboardingScreen(
 
             Spacer(modifier = Modifier.height(28.dp))
 
-            // Completion / Continuation actions
+            // Completion actions
             if (isNotificationListenerEnabled) {
                 Button(
                     onClick = {
@@ -420,8 +404,8 @@ fun FirstLaunchOnboardingScreen(
                     },
                     shape = RoundedCornerShape(14.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = MintGreen,
-                        contentColor = Color.Black
+                        containerColor = colors.primary,
+                        contentColor = if (colors.isDark) Color.Black else Color.White
                     ),
                     modifier = Modifier
                         .fillMaxWidth()
@@ -450,7 +434,7 @@ fun FirstLaunchOnboardingScreen(
                     Text(
                         text = "Continue without these permissions",
                         fontSize = 13.sp,
-                        color = TextSecondary,
+                        color = colors.textSecondary,
                         fontWeight = FontWeight.Medium
                     )
                 }
@@ -459,9 +443,9 @@ fun FirstLaunchOnboardingScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = "You can always change or configure these permissions later from the Settings tab.",
+                text = "You can always configure permissions and shortcuts later from Settings.",
                 fontSize = 11.sp,
-                color = TextTertiary,
+                color = colors.textTertiary,
                 textAlign = TextAlign.Center
             )
 

@@ -17,6 +17,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -27,18 +28,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.pocketexpense.ui.theme.DarkBorder
-import com.example.pocketexpense.ui.theme.DarkSurface
-import com.example.pocketexpense.ui.theme.ElectricPurple
-import com.example.pocketexpense.ui.theme.MintGreen
-import com.example.pocketexpense.ui.theme.TextPrimary
-import com.example.pocketexpense.ui.theme.TextSecondary
-import com.example.pocketexpense.ui.theme.TextTertiary
+import com.example.pocketexpense.ui.theme.AppTheme
 
 @Composable
 fun NotificationAccessCard(
@@ -48,31 +42,24 @@ fun NotificationAccessCard(
     isServiceConnected: Boolean = true,
     onRebindClick: (() -> Unit)? = null
 ) {
+    val colors = AppTheme.colors
+
     Surface(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(20.dp))
             .border(
                 width = 1.dp,
-                color = if (isPermissionGranted) MintGreen.copy(alpha = 0.4f) else DarkBorder,
+                color = if (isPermissionGranted) colors.primary.copy(alpha = 0.4f) else colors.border,
                 shape = RoundedCornerShape(20.dp)
             ),
-        color = DarkSurface
+        color = colors.surface
     ) {
         if (!isPermissionGranted) {
             // Permission Needed State (Onboarding Card)
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(
-                        Brush.linearGradient(
-                            colors = listOf(
-                                ElectricPurple.copy(alpha = 0.15f),
-                                MintGreen.copy(alpha = 0.08f),
-                                DarkSurface
-                            )
-                        )
-                    )
                     .padding(20.dp)
             ) {
                 Column {
@@ -84,13 +71,13 @@ fun NotificationAccessCard(
                             modifier = Modifier
                                 .size(38.dp)
                                 .clip(CircleShape)
-                                .background(MintGreen.copy(alpha = 0.15f)),
+                                .background(colors.primary.copy(alpha = 0.15f)),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
-                                imageVector = Icons.Default.CheckCircle,
+                                imageVector = Icons.Default.NotificationsActive,
                                 contentDescription = null,
-                                tint = MintGreen,
+                                tint = colors.primary,
                                 modifier = Modifier.size(20.dp)
                             )
                         }
@@ -100,13 +87,13 @@ fun NotificationAccessCard(
                                 text = "Auto-Track UPI Expenses",
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = TextPrimary
+                                color = colors.textPrimary
                             )
                             Text(
                                 text = "GPay • PhonePe • Paytm • CRED",
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Medium,
-                                color = MintGreen
+                                color = colors.primary
                             )
                         }
                     }
@@ -114,9 +101,9 @@ fun NotificationAccessCard(
                     Spacer(modifier = Modifier.height(10.dp))
 
                     Text(
-                        text = "Enable notification access so PocketExpense can automatically log payment transactions in real time.",
+                        text = "Enable notification access so PocketExpense can log payments in real time.",
                         fontSize = 13.sp,
-                        color = TextSecondary,
+                        color = colors.textSecondary,
                         lineHeight = 18.sp
                     )
 
@@ -126,14 +113,14 @@ fun NotificationAccessCard(
                         Icon(
                             imageVector = Icons.Default.Shield,
                             contentDescription = null,
-                            tint = TextTertiary,
+                            tint = colors.textTertiary,
                             modifier = Modifier.size(14.dp)
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
                             text = "100% on-device. Never reads OTPs, PINs, or bank passwords.",
                             fontSize = 11.sp,
-                            color = TextTertiary
+                            color = colors.textTertiary
                         )
                     }
 
@@ -143,8 +130,8 @@ fun NotificationAccessCard(
                         onClick = onEnableClick,
                         shape = RoundedCornerShape(12.dp),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = MintGreen,
-                            contentColor = Color.Black
+                            containerColor = colors.primary,
+                            contentColor = if (colors.isDark) Color.Black else Color.White
                         ),
                         modifier = Modifier.fillMaxWidth()
                     ) {
@@ -176,13 +163,13 @@ fun NotificationAccessCard(
                         modifier = Modifier
                             .size(32.dp)
                             .clip(CircleShape)
-                            .background(MintGreen.copy(alpha = 0.15f)),
+                            .background(colors.primary.copy(alpha = 0.15f)),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             imageVector = Icons.Default.CheckCircle,
                             contentDescription = null,
-                            tint = MintGreen,
+                            tint = colors.primary,
                             modifier = Modifier.size(18.dp)
                         )
                     }
@@ -192,12 +179,12 @@ fun NotificationAccessCard(
                             text = if (isServiceConnected) "Auto-Tracking Active" else "Access Granted • Connecting",
                             fontSize = 14.sp,
                             fontWeight = FontWeight.SemiBold,
-                            color = TextPrimary
+                            color = colors.textPrimary
                         )
                         Text(
-                            text = if (isServiceConnected) "Listening for UPI notifications on-device" else "Waiting for background service connection",
+                            text = if (isServiceConnected) "Listening for UPI notifications on-device" else "Waiting for background connection",
                             fontSize = 12.sp,
-                            color = TextSecondary
+                            color = colors.textSecondary
                         )
                     }
                 }
@@ -206,14 +193,14 @@ fun NotificationAccessCard(
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(8.dp))
-                            .background(MintGreen.copy(alpha = 0.15f))
+                            .background(colors.primary.copy(alpha = 0.15f))
                             .padding(horizontal = 8.dp, vertical = 4.dp)
                     ) {
                         Text(
                             text = "LIVE",
                             fontSize = 10.sp,
                             fontWeight = FontWeight.ExtraBold,
-                            color = MintGreen
+                            color = colors.primary
                         )
                     }
                 } else if (onRebindClick != null) {
@@ -221,8 +208,8 @@ fun NotificationAccessCard(
                         onClick = onRebindClick,
                         shape = RoundedCornerShape(8.dp),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = MintGreen.copy(alpha = 0.2f),
-                            contentColor = MintGreen
+                            containerColor = colors.primary.copy(alpha = 0.2f),
+                            contentColor = colors.primary
                         ),
                         contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 10.dp, vertical = 4.dp)
                     ) {

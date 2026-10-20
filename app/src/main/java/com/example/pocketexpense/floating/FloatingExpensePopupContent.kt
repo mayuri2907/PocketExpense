@@ -44,14 +44,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.pocketexpense.data.model.Category
-import com.example.pocketexpense.ui.theme.DarkBorder
-import com.example.pocketexpense.ui.theme.DarkSurface
-import com.example.pocketexpense.ui.theme.DarkSurfaceElevated
+import com.example.pocketexpense.ui.theme.AppTheme
 import com.example.pocketexpense.ui.theme.ElectricPurple
-import com.example.pocketexpense.ui.theme.MintGreen
-import com.example.pocketexpense.ui.theme.TextPrimary
-import com.example.pocketexpense.ui.theme.TextSecondary
-import com.example.pocketexpense.ui.theme.TextTertiary
 import com.example.pocketexpense.util.CurrencyUtils
 import kotlinx.coroutines.delay
 import kotlin.math.ceil
@@ -62,6 +56,7 @@ fun FloatingExpensePopupContent(
     modifier: Modifier = Modifier,
     totalCountdownMillis: Long = 3000L
 ) {
+    val colors = AppTheme.colors
     var remainingMillis by remember(item.expenseId) { mutableLongStateOf(totalCountdownMillis) }
     var targetProgress by remember(item.expenseId) { mutableFloatStateOf(1f) }
 
@@ -91,8 +86,8 @@ fun FloatingExpensePopupContent(
             .fillMaxWidth()
             .padding(horizontal = 12.dp)
             .clip(RoundedCornerShape(20.dp))
-            .border(1.5.dp, MintGreen.copy(alpha = 0.5f), RoundedCornerShape(20.dp)),
-        color = DarkSurface,
+            .border(1.5.dp, colors.primary.copy(alpha = 0.5f), RoundedCornerShape(20.dp)),
+        color = colors.surface,
         shadowElevation = 12.dp
     ) {
         Column(
@@ -132,14 +127,14 @@ fun FloatingExpensePopupContent(
                             text = item.merchant,
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Bold,
-                            color = TextPrimary,
+                            color = colors.textPrimary,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
                         Text(
                             text = "${item.appName} • Auto-Detected",
                             fontSize = 11.sp,
-                            color = TextTertiary
+                            color = colors.textTertiary
                         )
                     }
                 }
@@ -149,7 +144,7 @@ fun FloatingExpensePopupContent(
                         text = CurrencyUtils.paiseToRupeesString(item.amountInPaise),
                         fontSize = 16.sp,
                         fontWeight = FontWeight.ExtraBold,
-                        color = MintGreen
+                        color = colors.primary
                     )
 
                     IconButton(
@@ -159,7 +154,7 @@ fun FloatingExpensePopupContent(
                         Icon(
                             imageVector = Icons.Default.Close,
                             contentDescription = "Dismiss popup",
-                            tint = TextSecondary,
+                            tint = colors.textSecondary,
                             modifier = Modifier.size(18.dp)
                         )
                     }
@@ -183,14 +178,14 @@ fun FloatingExpensePopupContent(
                         },
                         fontSize = 11.sp,
                         fontWeight = FontWeight.SemiBold,
-                        color = TextSecondary
+                        color = colors.textSecondary
                     )
 
                     Text(
                         text = "${remainingSeconds}s",
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
-                        color = MintGreen
+                        color = colors.primary
                     )
                 }
 
@@ -202,8 +197,8 @@ fun FloatingExpensePopupContent(
                         .fillMaxWidth()
                         .height(3.dp)
                         .clip(RoundedCornerShape(2.dp)),
-                    color = MintGreen,
-                    trackColor = DarkSurfaceElevated,
+                    color = colors.primary,
+                    trackColor = colors.surfaceElevated,
                 )
             }
 
@@ -241,8 +236,9 @@ private fun FloatingCategoryChip(
     isSuggested: Boolean,
     onClick: () -> Unit
 ) {
-    val chipBorderColor = if (isSuggested) MintGreen else DarkBorder
-    val chipBgColor = if (isSuggested) MintGreen.copy(alpha = 0.15f) else DarkSurfaceElevated
+    val colors = AppTheme.colors
+    val chipBorderColor = if (isSuggested) colors.primary else colors.border
+    val chipBgColor = if (isSuggested) colors.primary.copy(alpha = 0.15f) else colors.surfaceElevated
 
     Row(
         modifier = Modifier
@@ -256,7 +252,7 @@ private fun FloatingCategoryChip(
         val categoryColor = try {
             Color(android.graphics.Color.parseColor(category.colorHex))
         } catch (_: Exception) {
-            MintGreen
+            colors.primary
         }
 
         Box(
@@ -272,7 +268,7 @@ private fun FloatingCategoryChip(
             text = category.name,
             fontSize = 12.sp,
             fontWeight = if (isSuggested) FontWeight.Bold else FontWeight.Medium,
-            color = if (isSuggested) TextPrimary else TextSecondary
+            color = if (isSuggested) colors.textPrimary else colors.textSecondary
         )
 
         if (isSuggested) {
@@ -280,7 +276,7 @@ private fun FloatingCategoryChip(
             Text(
                 text = "★",
                 fontSize = 10.sp,
-                color = MintGreen
+                color = colors.primary
             )
         }
     }

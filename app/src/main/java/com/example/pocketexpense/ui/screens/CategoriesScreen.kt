@@ -19,9 +19,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.PieChart
-import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -30,21 +27,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.pocketexpense.ui.components.CategoryIconHelper
-import com.example.pocketexpense.ui.theme.DarkBorder
-import com.example.pocketexpense.ui.theme.DarkBorderSubtle
-import com.example.pocketexpense.ui.theme.DarkSurface
-import com.example.pocketexpense.ui.theme.DarkSurfaceElevated
-import com.example.pocketexpense.ui.theme.DarkSurfaceHighlight
-import com.example.pocketexpense.ui.theme.MintGreen
-import com.example.pocketexpense.ui.theme.MintGreenContainer
-import com.example.pocketexpense.ui.theme.TextPrimary
-import com.example.pocketexpense.ui.theme.TextSecondary
-import com.example.pocketexpense.ui.theme.TextTertiary
+import com.example.pocketexpense.ui.theme.AppTheme
 import com.example.pocketexpense.ui.viewmodel.CategoriesUiState
 import com.example.pocketexpense.util.CurrencyUtils
 
@@ -53,6 +40,7 @@ fun CategoriesScreen(
     uiState: CategoriesUiState,
     modifier: Modifier = Modifier
 ) {
+    val colors = AppTheme.colors
     val grandTotal = if (uiState.totalExpensePaise > 0) uiState.totalExpensePaise else 1L
     val activeCount = uiState.categorySpending.count { it.totalPaise > 0 }
 
@@ -75,27 +63,27 @@ fun CategoriesScreen(
                         text = "Categories",
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Black,
-                        color = TextPrimary,
+                        color = colors.textPrimary,
                         letterSpacing = (-0.5).sp
                     )
                     Text(
-                        text = "Budget & Expense Distribution",
+                        text = "Expense Distribution",
                         fontSize = 12.sp,
                         fontWeight = FontWeight.SemiBold,
-                        color = MintGreen
+                        color = colors.primary
                     )
                 }
 
                 Surface(
                     shape = RoundedCornerShape(12.dp),
-                    color = MintGreenContainer.copy(alpha = 0.5f),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, MintGreen.copy(alpha = 0.3f))
+                    color = colors.primaryContainer.copy(alpha = 0.5f),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, colors.primary.copy(alpha = 0.3f))
                 ) {
                     Text(
                         text = "$activeCount active",
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
-                        color = MintGreen,
+                        color = colors.primary,
                         modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
                     )
                 }
@@ -119,8 +107,8 @@ fun CategoriesScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(20.dp))
-                    .border(1.dp, DarkBorder, RoundedCornerShape(20.dp)),
-                color = DarkSurface
+                    .border(1.dp, colors.border, RoundedCornerShape(20.dp)),
+                color = colors.surface
             ) {
                 Column(
                     modifier = Modifier
@@ -141,7 +129,7 @@ fun CategoriesScreen(
                                     .border(1.dp, catColor.copy(alpha = 0.35f), RoundedCornerShape(14.dp)),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Icon(
+                                androidx.compose.material3.Icon(
                                     imageVector = CategoryIconHelper.getIcon(spending.iconName),
                                     contentDescription = spending.categoryName,
                                     tint = catColor,
@@ -154,13 +142,13 @@ fun CategoriesScreen(
                                     text = spending.categoryName,
                                     fontSize = 16.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = TextPrimary
+                                    color = colors.textPrimary
                                 )
                                 Spacer(modifier = Modifier.height(2.dp))
                                 Text(
                                     text = "${spending.transactionCount} ${if (spending.transactionCount == 1) "entry" else "entries"}",
                                     fontSize = 12.sp,
-                                    color = TextTertiary
+                                    color = colors.textTertiary
                                 )
                             }
                         }
@@ -170,18 +158,18 @@ fun CategoriesScreen(
                                 text = CurrencyUtils.paiseToRupeesString(spending.totalPaise),
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Black,
-                                color = if (spending.totalPaise > 0) MintGreen else TextSecondary
+                                color = if (spending.totalPaise > 0) colors.primary else colors.textSecondary
                             )
                             Spacer(modifier = Modifier.height(2.dp))
                             Surface(
                                 shape = RoundedCornerShape(6.dp),
-                                color = DarkSurfaceHighlight
+                                color = colors.surfaceHighlight
                             ) {
                                 Text(
                                     text = "$percentage% of total",
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.SemiBold,
-                                    color = TextSecondary,
+                                    color = colors.textSecondary,
                                     modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                                 )
                             }
@@ -197,7 +185,7 @@ fun CategoriesScreen(
                             .height(7.dp)
                             .clip(RoundedCornerShape(4.dp)),
                         color = catColor,
-                        trackColor = DarkSurfaceElevated
+                        trackColor = colors.surfaceElevated
                     )
                 }
             }
