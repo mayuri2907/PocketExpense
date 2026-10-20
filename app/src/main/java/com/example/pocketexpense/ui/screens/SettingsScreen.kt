@@ -48,7 +48,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import com.example.pocketexpense.quick.QuickExpenseAccessibilityService
 import com.example.pocketexpense.quick.QuickNotificationHelper
 import com.example.pocketexpense.util.DiagnosticStatus
 import com.example.pocketexpense.util.NotificationDiagnosticTracker
@@ -61,6 +60,7 @@ import com.example.pocketexpense.ui.theme.DarkSurface
 import com.example.pocketexpense.ui.theme.DarkSurfaceElevated
 import com.example.pocketexpense.ui.theme.ElectricPurple
 import com.example.pocketexpense.ui.theme.MintGreen
+import com.example.pocketexpense.ui.theme.MintGreenContainer
 import com.example.pocketexpense.ui.theme.TextPrimary
 import com.example.pocketexpense.ui.theme.TextSecondary
 import com.example.pocketexpense.ui.theme.TextTertiary
@@ -447,14 +447,66 @@ fun SettingsScreen(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                // Global Double Volume-Up Trigger Status & Setup
-                val isAccessibilityServiceActive = remember {
-                    QuickExpenseAccessibilityService.isServiceEnabled(context)
-                }
-                val isOverlayActive = remember {
-                    com.example.pocketexpense.floating.OverlayPermissionHelper.canDrawOverlays(context)
+                // Paytm & Banking App Safe Guarantee Card
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(MintGreenContainer.copy(alpha = 0.35f))
+                        .border(1.dp, MintGreen.copy(alpha = 0.3f), RoundedCornerShape(14.dp))
+                        .padding(14.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(36.dp)
+                            .clip(CircleShape)
+                            .background(MintGreen.copy(alpha = 0.2f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Shield,
+                            contentDescription = "Safe",
+                            tint = MintGreen,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = "Paytm & Banking Safe",
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = TextPrimary
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Surface(
+                                shape = RoundedCornerShape(6.dp),
+                                color = MintGreen.copy(alpha = 0.2f)
+                            ) {
+                                Text(
+                                    text = "100% SAFE",
+                                    fontSize = 9.sp,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = MintGreen,
+                                    modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp)
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            text = "Zero Accessibility Services or intrusive overlays over Paytm. Your Paytm transactions and UPI payments run smoothly with zero security blocks or warnings.",
+                            fontSize = 11.sp,
+                            color = TextSecondary,
+                            lineHeight = 15.sp
+                        )
+                    }
                 }
 
+                Spacer(modifier = Modifier.height(10.dp))
+
+                // In-App Double Volume-Up Shortcut
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -467,64 +519,31 @@ fun SettingsScreen(
                     Column(modifier = Modifier.weight(1f)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
-                                text = "Double Volume-Up Trigger",
+                                text = "In-App Double Volume-Up",
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = TextPrimary
                             )
                             Spacer(modifier = Modifier.width(8.dp))
-                            Box(
-                                modifier = Modifier
-                                    .clip(RoundedCornerShape(6.dp))
-                                    .background(if (isAccessibilityServiceActive) MintGreen.copy(alpha = 0.15f) else TextTertiary.copy(alpha = 0.15f))
-                                    .padding(horizontal = 6.dp, vertical = 2.dp)
+                            Surface(
+                                shape = RoundedCornerShape(6.dp),
+                                color = MintGreen.copy(alpha = 0.15f)
                             ) {
                                 Text(
-                                    text = if (isAccessibilityServiceActive) "ACTIVE" else "DISABLED",
+                                    text = "READY",
                                     fontSize = 9.sp,
                                     fontWeight = FontWeight.ExtraBold,
-                                    color = if (isAccessibilityServiceActive) MintGreen else TextSecondary
+                                    color = MintGreen,
+                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                                 )
                             }
                         }
                         Spacer(modifier = Modifier.height(2.dp))
                         Text(
-                            text = if (isAccessibilityServiceActive)
-                                "Enabled: Press Volume-Up twice from anywhere to open Quick Expense above any app. PocketExpense never collects screen contents or passwords."
-                            else
-                                "Opt-in: Double-press Volume-Up across other apps and Home Screen to trigger Quick Expense. Requires user opt-in in Android Settings.",
+                            text = "Double-press Volume-Up while PocketExpense is open to instantly open the Quick Expense form.",
                             fontSize = 11.sp,
                             color = TextSecondary,
                             lineHeight = 15.sp
-                        )
-                        if (isAccessibilityServiceActive && !isOverlayActive) {
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = "Note: Grant Overlay Permission above so the popup floats above other apps instead of opening the full app.",
-                                fontSize = 10.sp,
-                                color = AmberWarning
-                            )
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.width(8.dp))
-
-                    OutlinedButton(
-                        onClick = {
-                            context.startActivity(QuickExpenseAccessibilityService.createSettingsIntent())
-                        },
-                        shape = RoundedCornerShape(10.dp),
-                        colors = ButtonDefaults.outlinedButtonColors(
-                            contentColor = if (isAccessibilityServiceActive) MintGreen else TextPrimary
-                        ),
-                        border = androidx.compose.foundation.BorderStroke(
-                            1.dp,
-                            if (isAccessibilityServiceActive) MintGreen.copy(alpha = 0.5f) else DarkBorder
-                        )
-                    ) {
-                        Text(
-                            text = if (isAccessibilityServiceActive) "Settings" else "Enable",
-                            fontSize = 11.sp
                         )
                     }
                 }

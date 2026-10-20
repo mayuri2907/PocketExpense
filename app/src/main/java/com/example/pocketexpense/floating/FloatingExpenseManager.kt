@@ -86,8 +86,17 @@ class FloatingExpenseManager(
         _activePendingExpense.value = nextItem
 
         if (nextItem != null) {
-            if (OverlayPermissionHelper.canDrawOverlays(context)) {
+            // Respect banking app security: Never draw overlay windows on Paytm
+            // to prevent Paytm's anti-overlay / screen security triggers from blocking transactions.
+            val isPaytm = nextItem.appName.equals("Paytm", ignoreCase = true) ||
+                    nextItem.merchant.contains("Paytm", ignoreCase = true)
+
+            if (!isPaytm && OverlayPermissionHelper.canDrawOverlays(context)) {
                 overlayWindow.show(nextItem)
+            } else if (isPaytm) {
+                // Paytm expense is already durably recorded in Room with its suggested category;
+                // advance queue without drawing an intrusive overlay over Paytm.
+                showNextQueuedItem()
             }
         } else {
             overlayWindow.dismiss()
