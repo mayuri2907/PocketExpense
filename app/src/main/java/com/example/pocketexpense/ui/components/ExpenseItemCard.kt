@@ -34,6 +34,7 @@ import com.example.pocketexpense.data.model.ExpenseWithCategory
 import com.example.pocketexpense.ui.theme.CoralRed
 import com.example.pocketexpense.ui.theme.DarkBorder
 import com.example.pocketexpense.ui.theme.DarkSurface
+import com.example.pocketexpense.ui.theme.DarkSurfaceElevated
 import com.example.pocketexpense.ui.theme.MintGreen
 import com.example.pocketexpense.ui.theme.TextPrimary
 import com.example.pocketexpense.ui.theme.TextSecondary
@@ -55,8 +56,8 @@ fun ExpenseItemCard(
     Surface(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .border(1.dp, DarkBorder, RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(18.dp))
+            .border(1.dp, DarkBorder, RoundedCornerShape(18.dp))
             .clickable { onEditClick() },
         color = DarkSurface
     ) {
@@ -72,19 +73,20 @@ fun ExpenseItemCard(
                 modifier = Modifier.weight(1f),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Category Icon
+                // Category Icon Avatar with glowing border
                 Box(
                     modifier = Modifier
-                        .size(44.dp)
-                        .clip(CircleShape)
-                        .background(categoryColor.copy(alpha = 0.15f)),
+                        .size(46.dp)
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(categoryColor.copy(alpha = 0.16f))
+                        .border(1.dp, categoryColor.copy(alpha = 0.35f), RoundedCornerShape(14.dp)),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = CategoryIconHelper.getIcon(category.iconName),
                         contentDescription = category.name,
                         tint = categoryColor,
-                        modifier = Modifier.size(22.dp)
+                        modifier = Modifier.size(24.dp)
                     )
                 }
 
@@ -94,30 +96,36 @@ fun ExpenseItemCard(
                     Text(
                         text = expense.title,
                         fontSize = 15.sp,
-                        fontWeight = FontWeight.SemiBold,
+                        fontWeight = FontWeight.Bold,
                         color = TextPrimary,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
-                    Spacer(modifier = Modifier.height(2.dp))
+                    Spacer(modifier = Modifier.height(3.dp))
                     Row(verticalAlignment = Alignment.CenterVertically) {
+                        Surface(
+                            shape = RoundedCornerShape(6.dp),
+                            color = categoryColor.copy(alpha = 0.12f)
+                        ) {
+                            Text(
+                                text = category.name,
+                                fontSize = 11.sp,
+                                color = categoryColor,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                            )
+                        }
                         Text(
-                            text = category.name,
-                            fontSize = 12.sp,
-                            color = categoryColor,
-                            fontWeight = FontWeight.Medium
-                        )
-                        Text(
-                            text = " • ${DateUtils.formatDate(expense.timestamp)}",
-                            fontSize = 12.sp,
+                            text = "  ${DateUtils.formatDate(expense.timestamp)}",
+                            fontSize = 11.sp,
                             color = TextTertiary
                         )
                     }
                     if (expense.note.isNotBlank()) {
-                        Spacer(modifier = Modifier.height(2.dp))
+                        Spacer(modifier = Modifier.height(3.dp))
                         Text(
                             text = expense.note,
-                            fontSize = 11.sp,
+                            fontSize = 12.sp,
                             color = TextSecondary,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
@@ -126,43 +134,46 @@ fun ExpenseItemCard(
                 }
             }
 
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(10.dp))
 
-            // Right: Amount + Actions
+            // Right: Amount + Action Buttons
             Column(
                 horizontalAlignment = Alignment.End
             ) {
                 Text(
                     text = CurrencyUtils.paiseToRupeesString(expense.amountInPaise),
                     fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.Black,
                     color = MintGreen
                 )
 
+                Spacer(modifier = Modifier.height(2.dp))
+
                 Row(
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(2.dp)
                 ) {
                     IconButton(
                         onClick = onEditClick,
-                        modifier = Modifier.size(36.dp)
+                        modifier = Modifier.size(32.dp)
                     ) {
                         Icon(
                             imageVector = Icons.Default.Edit,
-                            contentDescription = "Edit ${expense.title}",
+                            contentDescription = "Edit",
                             tint = TextSecondary,
-                            modifier = Modifier.size(18.dp)
+                            modifier = Modifier.size(16.dp)
                         )
                     }
 
                     IconButton(
                         onClick = onDeleteClick,
-                        modifier = Modifier.size(36.dp)
+                        modifier = Modifier.size(32.dp)
                     ) {
                         Icon(
                             imageVector = Icons.Default.Delete,
-                            contentDescription = "Delete ${expense.title}",
+                            contentDescription = "Delete",
                             tint = CoralRed.copy(alpha = 0.8f),
-                            modifier = Modifier.size(18.dp)
+                            modifier = Modifier.size(16.dp)
                         )
                     }
                 }

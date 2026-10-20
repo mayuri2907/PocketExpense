@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Card silhouette -->
+    <path
+        android:pathData="M 39,28 L 69,28 C 72,28 74,30 74,33 L 74,58 L 34,58 L 34,33 C 34,30 36,28 39,28 Z"
+        android:fillColor="#80FFFFFF" />
+
+    <!-- Pocket body -->
+    <path
+        android:pathData="M 28,47 Q 54,53 80,47 L 80,69 C 80,75 75,79 69,79 L 39,79 C 33,79 28,75 28,69 Z"
+        android:fillColor="#FFFFFFFF" />
+
+    <!-- Rupee symbol cutout -->
+    <!-- Top Horizontal Bar -->
+    <path
+        android:pathData="M 46.5,58 L 61.5,58"
+        android:strokeWidth="2.2"
+        android:strokeColor="#FF000000"
+        android:strokeLineCap="round" />
+
+    <!-- Middle Horizontal Bar -->
+    <path
+        android:pathData="M 46.5,62.2 L 58,62.2"
+        android:strokeWidth="2.2"
+        android:strokeColor="#FF000000"
+        android:strokeLineCap="round" />
+
+    <!-- Vertical Stem + Upper Curve -->
+    <path
+        android:pathData="M 50.8,58 L 50.8,66 C 55,66 58.5,64.8 58.5,61.8 C 58.5,58.8 55,58 50.8,58 Z"
+        android:fillColor="#FF000000" />
+
+    <!-- Inner Cutout -->
+    <path
+        android:pathData="M 52.8,60 L 52.8,64 C 54.6,64 56.4,63.2 56.4,61.8 C 56.4,60.5 54.6,60 52.8,60 Z"
+        android:fillColor="#FFFFFFFF" />
+
+    <!-- Diagonal Leg -->
+    <path
+        android:pathData="M 52,65 L 61.5,74.5"
+        android:strokeWidth="2.4"
+        android:strokeColor="#FF000000"
+        android:strokeLineCap="round" />
+
+</vector>

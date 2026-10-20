@@ -174,14 +174,15 @@ fun MainScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(DarkBackground),
+        containerColor = DarkBackground,
         snackbarHost = { SnackbarHost(snackbarHostState) },
         bottomBar = {
             NavigationBar(
                 containerColor = DarkSurface,
                 modifier = Modifier
-                    .clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp))
-                    .border(1.dp, DarkBorder, RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)),
-                tonalElevation = 8.dp
+                    .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
+                    .border(1.dp, DarkBorder, RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)),
+                tonalElevation = 10.dp
             ) {
                 NavTab.entries.forEach { tab ->
                     val isSelected = selectedTab == tab
@@ -192,14 +193,14 @@ fun MainScreen(
                             Icon(
                                 imageVector = tab.icon,
                                 contentDescription = tab.label,
-                                modifier = Modifier.size(22.dp)
+                                modifier = Modifier.size(24.dp)
                             )
                         },
                         label = {
                             Text(
                                 text = tab.label,
                                 fontSize = 11.sp,
-                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
                             )
                         },
                         colors = NavigationBarItemDefaults.colors(
@@ -207,7 +208,7 @@ fun MainScreen(
                             selectedTextColor = MintGreen,
                             unselectedIconColor = TextSecondary,
                             unselectedTextColor = TextSecondary,
-                            indicatorColor = MintGreen.copy(alpha = 0.15f)
+                            indicatorColor = MintGreen.copy(alpha = 0.18f)
                         )
                     )
                 }
@@ -222,13 +223,13 @@ fun MainScreen(
                     },
                     containerColor = MintGreen,
                     contentColor = Color.Black,
-                    shape = CircleShape,
-                    modifier = Modifier.padding(bottom = 16.dp)
+                    shape = RoundedCornerShape(20.dp),
+                    modifier = Modifier.padding(bottom = 12.dp)
                 ) {
                     Icon(
                         imageVector = Icons.Default.Add,
                         contentDescription = "Add Expense",
-                        modifier = Modifier.size(24.dp)
+                        modifier = Modifier.size(26.dp)
                     )
                 }
             }

@@ -20,6 +20,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ReceiptLong
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
@@ -32,6 +33,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -41,11 +43,14 @@ import com.example.pocketexpense.ui.components.ExpenseItemCard
 import com.example.pocketexpense.ui.theme.DarkBorder
 import com.example.pocketexpense.ui.theme.DarkSurface
 import com.example.pocketexpense.ui.theme.DarkSurfaceElevated
+import com.example.pocketexpense.ui.theme.DarkSurfaceHighlight
 import com.example.pocketexpense.ui.theme.MintGreen
+import com.example.pocketexpense.ui.theme.MintGreenContainer
 import com.example.pocketexpense.ui.theme.TextPrimary
 import com.example.pocketexpense.ui.theme.TextSecondary
 import com.example.pocketexpense.ui.theme.TextTertiary
 import com.example.pocketexpense.ui.viewmodel.TransactionsUiState
+import com.example.pocketexpense.util.CurrencyUtils
 
 @Composable
 fun TransactionsScreen(
@@ -56,32 +61,65 @@ fun TransactionsScreen(
     onDeleteExpense: (Expense) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val totalFilteredPaise = uiState.filteredExpenses.sumOf { it.expense.amountInPaise }
+
     Column(
         modifier = modifier
             .fillMaxSize()
             .padding(horizontal = 16.dp)
     ) {
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(10.dp))
 
-        Text(
-            text = "Transactions",
-            fontSize = 24.sp,
-            fontWeight = FontWeight.ExtraBold,
-            color = TextPrimary
-        )
+        // Title Header
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column {
+                Text(
+                    text = "Transactions",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Black,
+                    color = TextPrimary,
+                    letterSpacing = (-0.5).sp
+                )
+                Text(
+                    text = "History & Search",
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MintGreen
+                )
+            }
 
-        Spacer(modifier = Modifier.height(12.dp))
+            // Total Filtered Amount Badge
+            Surface(
+                shape = RoundedCornerShape(12.dp),
+                color = MintGreenContainer.copy(alpha = 0.5f),
+                border = androidx.compose.foundation.BorderStroke(1.dp, MintGreen.copy(alpha = 0.3f))
+            ) {
+                Text(
+                    text = CurrencyUtils.paiseToRupeesString(totalFilteredPaise),
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MintGreen,
+                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
+                )
+            }
+        }
 
-        // Search Bar
+        Spacer(modifier = Modifier.height(14.dp))
+
+        // Modern Pill Search Bar
         OutlinedTextField(
             value = uiState.searchQuery,
             onValueChange = onSearchQueryChange,
-            placeholder = { Text("Search by title, note or category...", fontSize = 14.sp) },
+            placeholder = { Text("Search by title, note, or merchant...", fontSize = 14.sp, color = TextTertiary) },
             leadingIcon = {
                 Icon(
                     imageVector = Icons.Default.Search,
                     contentDescription = "Search",
-                    tint = TextSecondary,
+                    tint = if (uiState.searchQuery.isNotEmpty()) MintGreen else TextSecondary,
                     modifier = Modifier.size(20.dp)
                 )
             },
@@ -99,18 +137,18 @@ fun TransactionsScreen(
             },
             singleLine = true,
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(16.dp),
+            shape = RoundedCornerShape(20.dp),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = MintGreen,
                 unfocusedBorderColor = DarkBorder,
                 focusedTextColor = TextPrimary,
                 unfocusedTextColor = TextPrimary,
-                focusedContainerColor = DarkSurface,
+                focusedContainerColor = DarkSurfaceElevated,
                 unfocusedContainerColor = DarkSurface
             )
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(14.dp))
 
         // Category Filter Chips
         LazyRow(
@@ -122,9 +160,9 @@ fun TransactionsScreen(
                 val isAllSelected = uiState.selectedCategoryId == null
                 Row(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(12.dp))
+                        .clip(RoundedCornerShape(14.dp))
                         .background(if (isAllSelected) MintGreen else DarkSurface)
-                        .border(1.dp, if (isAllSelected) MintGreen else DarkBorder, RoundedCornerShape(12.dp))
+                        .border(1.dp, if (isAllSelected) MintGreen else DarkBorder, RoundedCornerShape(14.dp))
                         .clickable { onCategorySelect(null) }
                         .padding(horizontal = 14.dp, vertical = 8.dp),
                     verticalAlignment = Alignment.CenterVertically
@@ -133,7 +171,7 @@ fun TransactionsScreen(
                         text = "All",
                         fontSize = 13.sp,
                         fontWeight = if (isAllSelected) FontWeight.Bold else FontWeight.Medium,
-                        color = if (isAllSelected) androidx.compose.ui.graphics.Color.Black else TextSecondary
+                        color = if (isAllSelected) Color.Black else TextSecondary
                     )
                 }
             }
@@ -145,16 +183,16 @@ fun TransactionsScreen(
 
                 Row(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(if (isSelected) catColor.copy(alpha = 0.25f) else DarkSurface)
-                        .border(1.dp, if (isSelected) catColor else DarkBorder, RoundedCornerShape(12.dp))
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(if (isSelected) catColor.copy(alpha = 0.22f) else DarkSurface)
+                        .border(1.dp, if (isSelected) catColor else DarkBorder, RoundedCornerShape(14.dp))
                         .clickable { onCategorySelect(category.id) }
                         .padding(horizontal = 12.dp, vertical = 8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Box(
                         modifier = Modifier
-                            .size(16.dp)
+                            .size(18.dp)
                             .clip(CircleShape)
                             .background(catColor),
                         contentAlignment = Alignment.Center
@@ -162,8 +200,8 @@ fun TransactionsScreen(
                         Icon(
                             imageVector = CategoryIconHelper.getIcon(category.iconName),
                             contentDescription = null,
-                            tint = androidx.compose.ui.graphics.Color.White,
-                            modifier = Modifier.size(10.dp)
+                            tint = Color.White,
+                            modifier = Modifier.size(11.dp)
                         )
                     }
                     Spacer(modifier = Modifier.width(6.dp))
@@ -177,13 +215,13 @@ fun TransactionsScreen(
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(14.dp))
 
         // Transaction Count & Results
         Text(
             text = "${uiState.filteredExpenses.size} ${if (uiState.filteredExpenses.size == 1) "transaction" else "transactions"}",
             fontSize = 13.sp,
-            fontWeight = FontWeight.Medium,
+            fontWeight = FontWeight.SemiBold,
             color = TextTertiary
         )
 
@@ -193,9 +231,9 @@ fun TransactionsScreen(
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 24.dp)
-                    .clip(RoundedCornerShape(20.dp))
-                    .border(1.dp, DarkBorder, RoundedCornerShape(20.dp)),
+                    .padding(top = 16.dp)
+                    .clip(RoundedCornerShape(22.dp))
+                    .border(1.dp, DarkBorder, RoundedCornerShape(22.dp)),
                 color = DarkSurface
             ) {
                 Column(
@@ -204,20 +242,36 @@ fun TransactionsScreen(
                         .padding(40.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
+                    Box(
+                        modifier = Modifier
+                            .size(52.dp)
+                            .clip(CircleShape)
+                            .background(DarkSurfaceHighlight),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ReceiptLong,
+                            contentDescription = null,
+                            tint = TextSecondary,
+                            modifier = Modifier.size(26.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(12.dp))
                     Text(
                         text = "No transactions found",
                         fontSize = 16.sp,
-                        fontWeight = FontWeight.SemiBold,
+                        fontWeight = FontWeight.Bold,
                         color = TextPrimary
                     )
                     Spacer(modifier = Modifier.height(6.dp))
                     Text(
                         text = if (uiState.searchQuery.isNotBlank() || uiState.selectedCategoryId != null)
-                            "Try clearing your search query or category filter."
+                            "Try clearing your search query or selecting a different category filter."
                         else
-                            "Add your first expense using the + button.",
+                            "Record an expense using the + button or quick shortcut.",
                         fontSize = 13.sp,
-                        color = TextSecondary
+                        color = TextSecondary,
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
                     )
                 }
             }
