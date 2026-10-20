@@ -178,6 +178,28 @@ class ExpenseViewModel(
     }
 
     /**
+     * Records a validated Quick Expense directly into Room with source 'QUICK_ENTRY'.
+     */
+    fun addQuickExpense(
+        amountPaise: Long,
+        description: String,
+        categoryId: Long
+    ) {
+        viewModelScope.launch {
+            val expense = Expense(
+                title = description.trim().ifBlank { "Quick Expense" },
+                amountInPaise = amountPaise,
+                categoryId = categoryId,
+                timestamp = System.currentTimeMillis(),
+                note = "Recorded via Quick Expense",
+                source = "QUICK_ENTRY"
+            )
+            repository.insertExpense(expense)
+            _userMessage.value = "Quick Expense saved"
+        }
+    }
+
+    /**
      * Updates an existing expense.
      * Returns a string error message if validation fails, or null on success.
      */

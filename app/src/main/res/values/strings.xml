@@ -1,4 +1,9 @@
 <resources>
     <string name="app_name">PocketExpense</string>
     <string name="notification_listener_service_label">PocketExpense UPI Payment Detector</string>
+    <string name="quick_expense_tile_label">Quick Expense</string>
+    <string name="quick_expense_shortcut_short_label">Quick Expense</string>
+    <string name="quick_expense_shortcut_long_label">Add Quick Expense</string>
+    <string name="accessibility_service_label">PocketExpense Quick Expense Key Trigger</string>
+    <string name="accessibility_service_description">Detects double-pressing the Volume-Up button to open the Quick Expense entry popup from anywhere. PocketExpense does not read, observe, or store any screen text, passwords, or personal data.</string>
 </resources>

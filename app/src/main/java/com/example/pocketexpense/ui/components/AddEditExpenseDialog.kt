@@ -153,6 +153,37 @@ fun AddEditExpenseDialog(
                     )
                 )
 
+                // Quick Amount Increments (One-tap fast entry fallback)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    listOf(50, 100, 200, 500).forEach { quickVal ->
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(DarkSurfaceElevated)
+                                .border(1.dp, DarkBorder, RoundedCornerShape(8.dp))
+                                .clickable {
+                                    val currentVal = amount.toDoubleOrNull() ?: 0.0
+                                    val newVal = if (amount.isBlank()) quickVal.toDouble() else currentVal + quickVal
+                                    amount = if (newVal % 1.0 == 0.0) newVal.toLong().toString() else String.format(java.util.Locale.US, "%.2f", newVal)
+                                    errorMessage = null
+                                }
+                                .padding(horizontal = 10.dp, vertical = 6.dp)
+                        ) {
+                            Text(
+                                text = "+₹$quickVal",
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = MintGreen
+                            )
+                        }
+                    }
+                }
+
                 Spacer(modifier = Modifier.height(16.dp))
 
                 // Title Field

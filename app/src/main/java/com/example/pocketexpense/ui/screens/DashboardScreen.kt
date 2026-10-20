@@ -22,6 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.filled.TrendingDown
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.FlashOn
 
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -67,7 +68,10 @@ fun DashboardScreen(
     onSeeAllTransactionsClick: () -> Unit,
     onEditExpense: (Expense) -> Unit,
     onDeleteExpense: (Expense) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isServiceConnected: Boolean = true,
+    onRebindService: (() -> Unit)? = null,
+    onQuickExpenseClick: () -> Unit = {}
 ) {
     LazyColumn(
         modifier = modifier
@@ -98,21 +102,39 @@ fun DashboardScreen(
                     )
                 }
 
-                Button(
-                    onClick = onAddExpenseClick,
-                    shape = RoundedCornerShape(14.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MintGreen,
-                        contentColor = Color.Black
-                    )
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = "Add Expense",
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(text = "Add", fontWeight = FontWeight.Bold)
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    androidx.compose.material3.OutlinedButton(
+                        onClick = onQuickExpenseClick,
+                        shape = RoundedCornerShape(14.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = MintGreen),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, MintGreen.copy(alpha = 0.6f))
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.FlashOn,
+                            contentDescription = "Quick Expense",
+                            modifier = Modifier.size(18.dp),
+                            tint = MintGreen
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(text = "Quick", fontWeight = FontWeight.Bold, color = MintGreen)
+                    }
+
+                    Button(
+                        onClick = onAddExpenseClick,
+                        shape = RoundedCornerShape(14.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MintGreen,
+                            contentColor = Color.Black
+                        )
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = "Add Expense",
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(text = "Add", fontWeight = FontWeight.Bold)
+                    }
                 }
             }
         }
@@ -193,7 +215,9 @@ fun DashboardScreen(
         item {
             NotificationAccessCard(
                 isPermissionGranted = isNotificationListenerEnabled,
-                onEnableClick = onEnableNotificationListener
+                onEnableClick = onEnableNotificationListener,
+                isServiceConnected = isServiceConnected,
+                onRebindClick = onRebindService
             )
         }
 

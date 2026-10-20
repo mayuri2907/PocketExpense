@@ -44,7 +44,9 @@ import com.example.pocketexpense.ui.theme.TextTertiary
 fun NotificationAccessCard(
     isPermissionGranted: Boolean,
     onEnableClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isServiceConnected: Boolean = true,
+    onRebindClick: (() -> Unit)? = null
 ) {
     Surface(
         modifier = modifier
@@ -187,31 +189,45 @@ fun NotificationAccessCard(
                     Spacer(modifier = Modifier.width(12.dp))
                     Column {
                         Text(
-                            text = "Auto-Tracking Active",
+                            text = if (isServiceConnected) "Auto-Tracking Active" else "Access Granted • Connecting",
                             fontSize = 14.sp,
                             fontWeight = FontWeight.SemiBold,
                             color = TextPrimary
                         )
                         Text(
-                            text = "Listening for UPI notifications on-device",
+                            text = if (isServiceConnected) "Listening for UPI notifications on-device" else "Waiting for background service connection",
                             fontSize = 12.sp,
                             color = TextSecondary
                         )
                     }
                 }
 
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(MintGreen.copy(alpha = 0.15f))
-                        .padding(horizontal = 8.dp, vertical = 4.dp)
-                ) {
-                    Text(
-                        text = "LIVE",
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.ExtraBold,
-                        color = MintGreen
-                    )
+                if (isServiceConnected) {
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(MintGreen.copy(alpha = 0.15f))
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                    ) {
+                        Text(
+                            text = "LIVE",
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = MintGreen
+                        )
+                    }
+                } else if (onRebindClick != null) {
+                    Button(
+                        onClick = onRebindClick,
+                        shape = RoundedCornerShape(8.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MintGreen.copy(alpha = 0.2f),
+                            contentColor = MintGreen
+                        ),
+                        contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 10.dp, vertical = 4.dp)
+                    ) {
+                        Text("Connect", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                    }
                 }
             }
         }

@@ -53,6 +53,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.example.pocketexpense.data.model.Expense
 import com.example.pocketexpense.service.ExpenseNotificationListenerService
 import com.example.pocketexpense.ui.components.AddEditExpenseDialog
+import com.example.pocketexpense.ui.components.QuickExpenseDialog
 import com.example.pocketexpense.ui.theme.CoralRed
 import com.example.pocketexpense.ui.theme.DarkBackground
 import com.example.pocketexpense.ui.theme.DarkBorder
@@ -67,6 +68,7 @@ import com.example.pocketexpense.util.NotificationPermissionHelper
 import com.example.pocketexpense.PocketExpenseApplication
 import com.example.pocketexpense.floating.FloatingExpensePopupContent
 import com.example.pocketexpense.floating.OverlayPermissionHelper
+import com.example.pocketexpense.util.OnboardingPreferences
 
 enum class NavTab(val label: String, val icon: ImageVector) {
     DASHBOARD("Dashboard", Icons.Default.Home),
@@ -77,7 +79,9 @@ enum class NavTab(val label: String, val icon: ImageVector) {
 
 @Composable
 fun MainScreen(
-    viewModel: ExpenseViewModel
+    viewModel: ExpenseViewModel,
+    isQuickExpenseTriggered: Boolean = false,
+    onQuickExpenseHandled: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -87,8 +91,21 @@ fun MainScreen(
 
     // Dialog & Interaction states
     var showAddDialog by remember { mutableStateOf(false) }
+    var showQuickExpenseDialog by remember { mutableStateOf(false) }
     var expenseToEdit by remember { mutableStateOf<Expense?>(null) }
     var expenseToDelete by remember { mutableStateOf<Expense?>(null) }
+
+    LaunchedEffect(isQuickExpenseTriggered) {
+        if (isQuickExpenseTriggered) {
+            showQuickExpenseDialog = true
+            onQuickExpenseHandled()
+        }
+    }
+
+    var isOnboardingCompleted by remember {
+        mutableStateOf(OnboardingPreferences.isOnboardingCompleted(context))
+    }
+    val isServiceConnected by ExpenseNotificationListenerService.isConnected.collectAsState()
 
     // Notification permission & Overlay permission tracking with reactive lifecycle refresh
     var isNotificationListenerEnabled by remember {
@@ -115,6 +132,25 @@ fun MainScreen(
         onDispose {
             lifecycleOwner.lifecycle.removeObserver(observer)
         }
+    }
+
+    if (!isOnboardingCompleted) {
+        FirstLaunchOnboardingScreen(
+            isNotificationListenerEnabled = isNotificationListenerEnabled,
+            isOverlayPermissionEnabled = isOverlayPermissionEnabled,
+            isServiceConnected = isServiceConnected,
+            onEnableNotificationAccess = {
+                ExpenseNotificationListenerService.tryRebind(context)
+                context.startActivity(NotificationPermissionHelper.createSettingsIntent())
+            },
+            onEnableOverlayPermission = {
+                context.startActivity(OverlayPermissionHelper.createOverlaySettingsIntent(context))
+            },
+            onCompleteOnboarding = {
+                isOnboardingCompleted = true
+            }
+        )
+        return
     }
 
     val snackbarHostState = remember { SnackbarHostState() }
@@ -210,6 +246,7 @@ fun MainScreen(
                         uiState = dashboardState,
                         isNotificationListenerEnabled = isNotificationListenerEnabled,
                         onEnableNotificationListener = {
+                            ExpenseNotificationListenerService.tryRebind(context)
                             context.startActivity(NotificationPermissionHelper.createSettingsIntent())
                         },
                         isOverlayPermissionEnabled = isOverlayPermissionEnabled,
@@ -227,6 +264,13 @@ fun MainScreen(
                         },
                         onDeleteExpense = { expense ->
                             expenseToDelete = expense
+                        },
+                        isServiceConnected = isServiceConnected,
+                        onRebindService = {
+                            ExpenseNotificationListenerService.tryRebind(context)
+                        },
+                        onQuickExpenseClick = {
+                            showQuickExpenseDialog = true
                         }
                     )
 
@@ -264,7 +308,11 @@ fun MainScreen(
                                 context.startActivity(Intent.createChooser(shareIntent, "Export Expenses"))
                             }
                         },
-                        onResetDatabase = { viewModel.resetDatabase() }
+                        onResetDatabase = { viewModel.resetDatabase() },
+                        isServiceConnected = isServiceConnected,
+                        onReopenOnboarding = {
+                            isOnboardingCompleted = false
+                        }
                     )
                 }
             }
@@ -357,6 +405,19 @@ fun MainScreen(
             },
             containerColor = DarkSurface,
             shape = RoundedCornerShape(20.dp)
+        )
+    }
+
+    // Quick Expense Dialog
+    if (showQuickExpenseDialog) {
+        QuickExpenseDialog(
+            categories = transactionsState.categories.ifEmpty { com.example.pocketexpense.data.model.Category.defaultCategories() },
+            onSaveExpense = { amountPaise, description, categoryId ->
+                viewModel.addQuickExpense(amountPaise, description, categoryId)
+            },
+            onDismiss = {
+                showQuickExpenseDialog = false
+            }
         )
     }
 }

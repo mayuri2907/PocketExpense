@@ -19,6 +19,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.FlashOn
 import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material.icons.automirrored.filled.HelpOutline
 import androidx.compose.material.icons.filled.Info
@@ -32,8 +33,11 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -42,9 +46,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import com.example.pocketexpense.quick.QuickExpenseAccessibilityService
+import com.example.pocketexpense.quick.QuickNotificationHelper
+import com.example.pocketexpense.util.DiagnosticStatus
+import com.example.pocketexpense.util.NotificationDiagnosticTracker
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.pocketexpense.ui.theme.AmberWarning
 import com.example.pocketexpense.ui.theme.CoralRed
 import com.example.pocketexpense.ui.theme.DarkBorder
 import com.example.pocketexpense.ui.theme.DarkSurface
@@ -65,7 +75,9 @@ fun SettingsScreen(
     onEnableOverlayPermission: () -> Unit,
     onExportData: () -> Unit,
     onResetDatabase: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isServiceConnected: Boolean = true,
+    onReopenOnboarding: (() -> Unit)? = null
 ) {
     var showResetDialog by remember { mutableStateOf(false) }
 
@@ -176,20 +188,23 @@ fun SettingsScreen(
                         )
                     }
 
+                    val (statusLabel, statusColor) = when {
+                        !isNotificationListenerEnabled -> "DISABLED" to CoralRed
+                        !isServiceConnected -> "CONNECTING" to AmberWarning
+                        else -> "LIVE & CONNECTED" to MintGreen
+                    }
+
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(8.dp))
-                            .background(
-                                if (isNotificationListenerEnabled) MintGreen.copy(alpha = 0.15f)
-                                else CoralRed.copy(alpha = 0.15f)
-                            )
+                            .background(statusColor.copy(alpha = 0.15f))
                             .padding(horizontal = 8.dp, vertical = 4.dp)
                     ) {
                         Text(
-                            text = if (isNotificationListenerEnabled) "ACTIVE" else "DISABLED",
+                            text = statusLabel,
                             fontSize = 10.sp,
                             fontWeight = FontWeight.Bold,
-                            color = if (isNotificationListenerEnabled) MintGreen else CoralRed
+                            color = statusColor
                         )
                     }
                 }
@@ -197,7 +212,11 @@ fun SettingsScreen(
                 Spacer(modifier = Modifier.height(10.dp))
 
                 Text(
-                    text = "Detects expenses from Google Pay, PhonePe, Paytm, and CRED. Never reads OTPs, PINs, or bank passwords.",
+                    text = when {
+                        !isNotificationListenerEnabled -> "Notification access is disabled. PocketExpense cannot read payment notifications until enabled."
+                        !isServiceConnected -> "Permission is granted, but the Android system has not connected the listener service yet. Tap below to rebind."
+                        else -> "Actively listening for payment notifications from Google Pay, PhonePe, Paytm, and CRED. 100% on-device."
+                    },
                     fontSize = 13.sp,
                     color = TextSecondary,
                     lineHeight = 18.sp
@@ -217,7 +236,9 @@ fun SettingsScreen(
                         border = androidx.compose.foundation.BorderStroke(1.dp, DarkBorder)
                     ) {
                         Text(
-                            text = if (isNotificationListenerEnabled) "Notification Access" else "Enable Notifications",
+                            text = if (isNotificationListenerEnabled) {
+                                if (isServiceConnected) "Notification Access" else "Reconnect Listener"
+                            } else "Enable Notifications",
                             fontSize = 11.sp
                         )
                     }
@@ -239,10 +260,334 @@ fun SettingsScreen(
                         )
                     }
                 }
+
+                if (onReopenOnboarding != null) {
+                    Spacer(modifier = Modifier.height(10.dp))
+                    OutlinedButton(
+                        onClick = onReopenOnboarding,
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = TextSecondary),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, DarkBorder)
+                    ) {
+                        Text(
+                            text = "Revisit Permission Setup Guide",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                }
             }
         }
 
-        // 3. OEM Background Reliability Guide
+        // 2B. Live Detection Diagnostics Card
+        val diagnosticEvents by NotificationDiagnosticTracker.events.collectAsState()
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(20.dp))
+                .border(1.dp, DarkBorder, RoundedCornerShape(20.dp)),
+            color = DarkSurface
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Default.Info,
+                            contentDescription = "Diagnostics",
+                            tint = MintGreen,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "Detection Diagnostics",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = TextPrimary
+                        )
+                    }
+
+                    if (diagnosticEvents.isNotEmpty()) {
+                        Text(
+                            text = "${diagnosticEvents.size} events",
+                            fontSize = 11.sp,
+                            color = TextTertiary
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                if (diagnosticEvents.isEmpty()) {
+                    Text(
+                        text = "No payment events detected in this session yet. When a supported notification arrives from Paytm, PhonePe, Google Pay, or CRED, its processing status will appear here.",
+                        fontSize = 12.sp,
+                        color = TextSecondary,
+                        lineHeight = 17.sp
+                    )
+                } else {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        diagnosticEvents.take(5).forEach { event ->
+                            val (badgeBg, badgeFg) = when (event.status) {
+                                DiagnosticStatus.PARSED_SUCCESS -> MintGreen.copy(alpha = 0.15f) to MintGreen
+                                DiagnosticStatus.DUPLICATE_IGNORED -> TextTertiary.copy(alpha = 0.15f) to TextSecondary
+                                DiagnosticStatus.NON_EXPENSE_IGNORED -> TextTertiary.copy(alpha = 0.15f) to TextTertiary
+                                DiagnosticStatus.AMBIGUOUS_UNPARSED -> AmberWarning.copy(alpha = 0.15f) to AmberWarning
+                                DiagnosticStatus.SERVICE_DISCONNECTED -> CoralRed.copy(alpha = 0.15f) to CoralRed
+                                DiagnosticStatus.DATABASE_ERROR -> CoralRed.copy(alpha = 0.15f) to CoralRed
+                            }
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clip(RoundedCornerShape(10.dp))
+                                    .background(DarkSurfaceElevated)
+                                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Text(
+                                            text = event.appDisplayName,
+                                            fontSize = 12.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = TextPrimary
+                                        )
+                                        Spacer(modifier = Modifier.width(6.dp))
+                                        Text(
+                                            text = "• ${event.timeFormatted}",
+                                            fontSize = 10.sp,
+                                            color = TextTertiary
+                                        )
+                                    }
+                                    Spacer(modifier = Modifier.height(2.dp))
+                                    Text(
+                                        text = event.summary,
+                                        fontSize = 11.sp,
+                                        color = TextSecondary,
+                                        maxLines = 2
+                                    )
+                                }
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Box(
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(6.dp))
+                                        .background(badgeBg)
+                                        .padding(horizontal = 6.dp, vertical = 3.dp)
+                                ) {
+                                    Text(
+                                        text = when (event.status) {
+                                            DiagnosticStatus.PARSED_SUCCESS -> "SUCCESS"
+                                            DiagnosticStatus.DUPLICATE_IGNORED -> "DUPLICATE"
+                                            DiagnosticStatus.NON_EXPENSE_IGNORED -> "IGNORED"
+                                            DiagnosticStatus.AMBIGUOUS_UNPARSED -> "AMBIGUOUS"
+                                            DiagnosticStatus.SERVICE_DISCONNECTED -> "DISCONNECTED"
+                                            DiagnosticStatus.DATABASE_ERROR -> "ERROR"
+                                        },
+                                        fontSize = 9.sp,
+                                        fontWeight = FontWeight.ExtraBold,
+                                        color = badgeFg
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // 3. Quick Expense Shortcuts & Gestures
+        val context = LocalContext.current
+        var isQuickNotifEnabled by remember { mutableStateOf(QuickNotificationHelper.isEnabled(context)) }
+
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(20.dp))
+                .border(1.dp, DarkBorder, RoundedCornerShape(20.dp)),
+            color = DarkSurface
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp)
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Default.FlashOn,
+                        contentDescription = "Quick Expense",
+                        tint = MintGreen,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Quick Expense Triggers",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = TextPrimary
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                Text(
+                    text = "Multiple fast entry triggers are supported across Android to record expenses in seconds:",
+                    fontSize = 12.sp,
+                    color = TextSecondary,
+                    lineHeight = 17.sp
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Global Double Volume-Up Trigger Status & Setup
+                val isAccessibilityServiceActive = remember {
+                    QuickExpenseAccessibilityService.isServiceEnabled(context)
+                }
+                val isOverlayActive = remember {
+                    com.example.pocketexpense.floating.OverlayPermissionHelper.canDrawOverlays(context)
+                }
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(DarkSurfaceElevated)
+                        .padding(12.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = "Double Volume-Up Trigger",
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = TextPrimary
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(6.dp))
+                                    .background(if (isAccessibilityServiceActive) MintGreen.copy(alpha = 0.15f) else TextTertiary.copy(alpha = 0.15f))
+                                    .padding(horizontal = 6.dp, vertical = 2.dp)
+                            ) {
+                                Text(
+                                    text = if (isAccessibilityServiceActive) "ACTIVE" else "DISABLED",
+                                    fontSize = 9.sp,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = if (isAccessibilityServiceActive) MintGreen else TextSecondary
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            text = if (isAccessibilityServiceActive)
+                                "Enabled: Press Volume-Up twice from anywhere to open Quick Expense above any app. PocketExpense never collects screen contents or passwords."
+                            else
+                                "Opt-in: Double-press Volume-Up across other apps and Home Screen to trigger Quick Expense. Requires user opt-in in Android Settings.",
+                            fontSize = 11.sp,
+                            color = TextSecondary,
+                            lineHeight = 15.sp
+                        )
+                        if (isAccessibilityServiceActive && !isOverlayActive) {
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = "Note: Grant Overlay Permission above so the popup floats above other apps instead of opening the full app.",
+                                fontSize = 10.sp,
+                                color = AmberWarning
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    OutlinedButton(
+                        onClick = {
+                            context.startActivity(QuickExpenseAccessibilityService.createSettingsIntent())
+                        },
+                        shape = RoundedCornerShape(10.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            contentColor = if (isAccessibilityServiceActive) MintGreen else TextPrimary
+                        ),
+                        border = androidx.compose.foundation.BorderStroke(
+                            1.dp,
+                            if (isAccessibilityServiceActive) MintGreen.copy(alpha = 0.5f) else DarkBorder
+                        )
+                    ) {
+                        Text(
+                            text = if (isAccessibilityServiceActive) "Settings" else "Enable",
+                            fontSize = 11.sp
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                OemTipItem(
+                    brand = "Android Quick Settings Tile (Recommended)",
+                    instruction = "Swipe down twice from top of screen → Edit tiles → Add 'Quick Expense'. Tap it from any screen or app to open the quick form."
+                )
+
+                OemTipItem(
+                    brand = "OEM Back-Tap / Quick Tap Gesture",
+                    instruction = "Supported on Pixel (Quick Tap), Motorola (Quick Launch), & Samsung (Good Lock). In your phone's Gesture settings, map Back-Tap to the PocketExpense 'Quick Expense' shortcut."
+                )
+
+                OemTipItem(
+                    brand = "Home Screen App Shortcut",
+                    instruction = "Long-press the PocketExpense app icon on your home launcher and tap 'Quick Expense'."
+                )
+
+                Spacer(modifier = Modifier.height(14.dp))
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(DarkSurfaceElevated)
+                        .padding(12.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = "Notification Shortcut",
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = TextPrimary
+                        )
+                        Text(
+                            text = "Show ongoing notification with Quick Add button",
+                            fontSize = 11.sp,
+                            color = TextSecondary
+                        )
+                    }
+                    Switch(
+                        checked = isQuickNotifEnabled,
+                        onCheckedChange = { enabled ->
+                            isQuickNotifEnabled = enabled
+                            QuickNotificationHelper.setEnabled(context, enabled)
+                        },
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = Color.Black,
+                            checkedTrackColor = MintGreen,
+                            uncheckedThumbColor = TextTertiary,
+                            uncheckedTrackColor = DarkSurface
+                        )
+                    )
+                }
+            }
+        }
+
+        // 4. OEM Background Reliability Guide
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
@@ -434,7 +779,7 @@ fun SettingsScreen(
                     Spacer(modifier = Modifier.width(12.dp))
                     Column {
                         Text(
-                            text = "PocketExpense v1.0.0",
+                            text = "PocketExpense v1.0.1",
                             fontSize = 14.sp,
                             fontWeight = FontWeight.SemiBold,
                             color = TextPrimary

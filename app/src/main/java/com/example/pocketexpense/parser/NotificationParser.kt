@@ -2,13 +2,14 @@ package com.example.pocketexpense.parser
 
 interface NotificationParser {
     val supportedPackageName: String
+    val supportedPackageNames: Set<String> get() = setOf(supportedPackageName)
     val appDisplayName: String
 
     /**
      * Quick check if the notification comes from this app's package.
      */
     fun matchesPackage(packageName: String): Boolean =
-        supportedPackageName.equals(packageName.trim(), ignoreCase = true)
+        supportedPackageNames.any { it.equals(packageName.trim(), ignoreCase = true) }
 
     /**
      * Parses the incoming notification title and text.

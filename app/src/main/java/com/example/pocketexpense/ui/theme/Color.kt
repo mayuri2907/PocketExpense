@@ -22,6 +22,7 @@ val CoralRedContainer = Color(0xFF381515)
 
 val AmberGold = Color(0xFFFFB800)
 val AmberGoldContainer = Color(0xFF382905)
+val AmberWarning = AmberGold
 
 // Typography & Content Colors
 val TextPrimary = Color(0xFFF8FAFC)
